@@ -16,7 +16,7 @@
    - לוחצים Deploy ומעתיקים את ה־URL שנגמר ב־`/exec`.
 
 ### 2. האתר
-1. יוצרים ריפו ב־GitHub, למשל `wedding-rsvp`, ומעלים אליו את `index.html` ואת `invite.png`.
+1. יוצרים ריפו ב־GitHub, למשל `wedding-rsvp`, ומעלים אליו את `index.html` ואת `invite.jpg`.
 2. ב־`index.html`:
    - בתוך `CONFIG`, מדביקים ב־`API_URL` את הכתובת מסעיף 1.4.
    - בתגית `og:image` למעלה מחליפים את `USERNAME` בשם המשתמש שלך ב־GitHub. זו התמונה שוואטסאפ מציג מעל הקישור.

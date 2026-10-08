@@ -151,7 +151,8 @@ function generateLinks() {
       return;
     }
     const text = INVITE_MESSAGE.replace('{name}', name).replace('{link}', SITE_URL + '?id=' + id);
-    const wa = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+    // api.whatsapp.com ולא wa.me: ההפניה של wa.me משבשת אימוג'ים להודעה עם �
+    const wa = 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(text);
     links.push([`=HYPERLINK("${wa}","שלח בוואטסאפ 📲")`]);
     made++;
   });
