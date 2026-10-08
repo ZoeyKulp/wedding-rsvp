@@ -1,0 +1,69 @@
+<!doctype html>
+<!-- מקור לתמונת התצוגה המקדימה (invite.png). מצלמים ב-1200x630 -->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: radial-gradient(ellipse at center, #fffdf8 0%, #f5efe3 70%, #ece3d2 100%);
+    font-family: 'Assistant', sans-serif; color: #2b2a27;
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .frame { position: absolute; inset: 22px; border: 1.5px solid #c9ad7f; border-radius: 6px; }
+  .frame::after { content: ''; position: absolute; inset: 8px; border: 1px solid #e2d3b6; border-radius: 3px; }
+  .branch { position: absolute; width: 300px; height: 300px; }
+  .tl { top: 0; left: 0; }
+  .br { bottom: 0; right: 0; transform: rotate(180deg); }
+  .content { text-align: center; position: relative; }
+  .eyebrow { font-size: 30px; color: #7a756c; margin: 0; }
+  h1 { font-family: 'Frank Ruhl Libre', serif; font-size: 104px; line-height: 1.1; margin: 14px 0 10px; color: #5b6b4e; font-weight: 700; }
+  .date { direction: ltr; display: flex; justify-content: center; align-items: center; gap: 26px;
+          font-family: 'Frank Ruhl Libre', serif; font-size: 58px; color: #b08d57; }
+  .date i { width: 1.5px; height: 48px; background: #b08d57; opacity: .6; }
+  .venue { font-size: 32px; margin: 16px 0 0; font-weight: 600; }
+  .rings { display: block; margin: 0 auto 6px; }
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+
+  <svg class="branch tl" viewBox="0 0 300 300">
+    <g fill="none" stroke="#7d8c6c" stroke-width="2.5" stroke-linecap="round">
+      <path d="M20 280 C 60 200, 120 120, 270 40"/>
+      <path d="M10 200 C 50 150, 90 110, 170 70"/>
+    </g>
+    <g fill="#8fa07c" opacity=".85">
+      <ellipse cx="70" cy="200" rx="22" ry="11" transform="rotate(-60 70 200)"/>
+      <ellipse cx="100" cy="225" rx="22" ry="11" transform="rotate(20 100 225)"/>
+      <ellipse cx="115" cy="140" rx="22" ry="11" transform="rotate(-60 115 140)"/>
+      <ellipse cx="150" cy="160" rx="22" ry="11" transform="rotate(15 150 160)"/>
+      <ellipse cx="170" cy="92" rx="20" ry="10" transform="rotate(-55 170 92)"/>
+      <ellipse cx="205" cy="110" rx="20" ry="10" transform="rotate(10 205 110)"/>
+      <ellipse cx="235" cy="58" rx="17" ry="9" transform="rotate(-45 235 58)"/>
+      <ellipse cx="50" cy="160" rx="17" ry="9" transform="rotate(-70 50 160)"/>
+      <ellipse cx="90" cy="125" rx="17" ry="9" transform="rotate(-60 90 125)"/>
+      <ellipse cx="128" cy="98" rx="15" ry="8" transform="rotate(-50 128 98)"/>
+    </g>
+    <g fill="#e9c9a8"><circle cx="190" cy="140" r="6"/><circle cx="60" cy="245" r="5"/><circle cx="250" cy="90" r="5"/></g>
+  </svg>
+  <svg class="branch br" viewBox="0 0 300 300"><use href="#"/></svg>
+
+  <div class="content">
+    <svg class="rings" width="110" height="60" viewBox="0 0 110 60">
+      <g fill="none" stroke="#b08d57" stroke-width="4"><circle cx="40" cy="32" r="22"/><circle cx="70" cy="32" r="22"/></g>
+      <path d="M40 4 l5 6 h-10z" fill="#c9ad7f"/>
+    </svg>
+    <p class="eyebrow">אנחנו מתחתנים!</p>
+    <h1>ידין & ויקטוריה</h1>
+    <div class="date"><span>26</span><i></i><span>11</span><i></i><span>2026</span></div>
+    <p class="venue">חוות אלנבי · נצר סרני</p>
+  </div>
+
+  <script>
+    // משכפל את הענף לפינה השנייה
+    document.querySelector('.br').innerHTML = document.querySelector('.tl').innerHTML;
+  </script>
+</body>
+</html>

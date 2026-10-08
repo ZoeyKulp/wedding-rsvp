@@ -1,0 +1,376 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>החתונה של ידין וויקטוריה</title>
+<!-- התצוגה המקדימה שוואטסאפ מציג מעל הקישור -->
+<meta property="og:title" content="ידין & ויקטוריה מתחתנים 💍">
+<meta property="og:description" content="26.11.2026 · חוות אלנבי, נצר סרני · לחצו לאישור הגעה">
+<!-- כתובת מלאה (לא יחסית!) לתמונה. נוצרה מ-tools/og-card.html -->
+<meta property="og:image" content="https://zoeykulp.github.io/wedding-rsvp/invite.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fffdf9;
+    --ink: #2b2a27;
+    --muted: #7a756c;
+    --line: #e6dfd3;
+    --accent: #5b6b4e;
+    --accent-ink: #ffffff;
+    --accent-soft: #e9ede3;
+    --gold: #b08d57;
+    --danger: #a14a3b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.5 'Assistant', system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+  main {
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px 22px;
+    box-shadow: 0 10px 30px rgba(60, 50, 30, .07);
+  }
+  [hidden] { display: none !important; }
+
+  .invite-img { display: block; width: 100%; border-radius: 12px; margin-bottom: 22px; }
+  .hero { text-align: center; padding-bottom: 24px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .eyebrow { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
+  h1 { font-family: 'Frank Ruhl Libre', serif; font-size: 38px; line-height: 1.2; margin: 14px 0 16px; font-weight: 700; color: var(--accent); }
+  .date {
+    direction: ltr; display: flex; justify-content: center; align-items: center; gap: 16px;
+    font-family: 'Frank Ruhl Libre', serif; font-size: 34px; font-weight: 500; color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .date i { width: 1px; height: 30px; background: var(--gold); opacity: .6; }
+  .meta { margin: 2px 0; color: var(--muted); }
+  .venue { color: var(--ink); font-weight: 600; margin-top: 6px; }
+  .times { display: flex; justify-content: center; margin-top: 16px; }
+  .times div { display: flex; flex-direction: column; padding: 0 22px; }
+  .times div + div { border-right: 1px solid var(--line); }
+  .times b { font-size: 19px; }
+  .times span { color: var(--muted); font-size: 14px; }
+  .greet { font-size: 19px; text-align: center; margin: 0 0 18px; }
+  .note { background: var(--accent-soft); border-radius: 10px; padding: 8px 12px; font-size: 15px; text-align: center; margin: -6px 0 18px; }
+
+  .choices { display: grid; gap: 10px; margin-bottom: 22px; }
+  .choice {
+    font: inherit; font-weight: 600; font-size: 18px;
+    padding: 14px; border-radius: 14px; cursor: pointer;
+    background: var(--card); color: var(--ink); border: 1.5px solid var(--line);
+    transition: border-color .15s, background .15s;
+  }
+  .choice:hover { border-color: var(--accent); }
+  .choice[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .field { margin-bottom: 20px; }
+  .label { display: block; font-weight: 600; margin-bottom: 8px; }
+  .hint { color: var(--muted); font-size: 15px; margin: -4px 0 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .row + .row { border-top: 1px dashed var(--line); }
+
+  .stepper { display: inline-flex; align-items: center; gap: 4px; }
+  .stepper button {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+    font-size: 22px; line-height: 1; cursor: pointer;
+  }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper output { min-width: 36px; text-align: center; font-size: 20px; font-weight: 700; }
+
+  .check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
+  .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+  textarea {
+    width: 100%; font: inherit; padding: 10px 12px; margin-top: 10px;
+    border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
+    resize: vertical; min-height: 70px;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+
+  .primary {
+    width: 100%; font: inherit; font-weight: 700; font-size: 19px;
+    padding: 15px; border: 0; border-radius: 14px; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink);
+  }
+  .primary:disabled { opacity: .45; cursor: default; }
+  .secondary {
+    display: block; width: 100%; text-align: center; text-decoration: none;
+    font: inherit; font-weight: 600; padding: 13px; margin-top: 10px;
+    border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
+  }
+  .error-msg { color: var(--danger); text-align: center; font-weight: 600; }
+
+  .center { text-align: center; }
+  .big-emoji { font-size: 54px; margin: 8px 0; }
+  .spinner {
+    width: 36px; height: 36px; margin: 40px auto; border-radius: 50%;
+    border: 3px solid var(--line); border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<main>
+  <img id="invite-img" class="invite-img" alt="ההזמנה לחתונה" hidden>
+  <header class="hero">
+    <p class="eyebrow">שמחים ומתרגשים להזמינכם<br>לחגוג עמנו את נישואינו</p>
+    <h1 id="couple"></h1>
+    <div class="date" id="date"></div>
+    <p class="meta" id="date-line"></p>
+    <p class="meta venue" id="venue"></p>
+    <div class="times" id="times" hidden>
+      <div><b id="t-reception"></b><span>קבלת פנים</span></div>
+      <div><b id="t-chuppah"></b><span>חופה וקידושין</span></div>
+    </div>
+  </header>
+
+  <section id="loading"><div class="spinner" aria-label="טוען"></div></section>
+
+  <section id="error" class="center" hidden>
+    <div class="big-emoji">🤔</div>
+    <p id="error-text">הקישור לא תקין. כדאי לבדוק שהעתקתם אותו במלואו מההודעה.</p>
+  </section>
+
+  <section id="form-view" hidden>
+    <p class="greet">היי <strong id="guest-name"></strong>, נשמח לדעת אם תגיעו 🤍</p>
+    <p class="note" id="prev-note" hidden>כבר אישרתם. אפשר לעדכן את התשובה כאן.</p>
+
+    <div class="choices" role="radiogroup" aria-label="האם תגיעו?">
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="מגיע">כן, נגיע 🎉</button>
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="לא מגיע">לא נוכל להגיע</button>
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="אולי">עוד לא בטוחים</button>
+    </div>
+
+    <div id="coming" hidden>
+      <div class="field row">
+        <span class="label" style="margin:0">כמה תהיו?</span>
+        <div class="stepper" data-key="count"></div>
+      </div>
+
+      <div class="field">
+        <span class="label">העדפות אוכל</span>
+        <p class="hint">כמה מכם צריכים מנה מיוחדת? (אם אף אחד, אפשר לדלג)</p>
+        <div class="row"><span>צמחוני</span><div class="stepper" data-key="veg"></div></div>
+        <div class="row"><span>טבעוני</span><div class="stepper" data-key="vegan"></div></div>
+        <div class="row"><span>ללא גלוטן</span><div class="stepper" data-key="gf"></div></div>
+      </div>
+
+      <div class="field">
+        <label class="check"><input type="checkbox" id="has-allergy"> יש אלרגיה למזון</label>
+        <textarea id="allergy" hidden maxlength="300" placeholder="לאיזה מזון? (למשל: אגוזים, שומשום, דגים)"></textarea>
+      </div>
+    </div>
+
+    <div class="field" id="notes-field" hidden>
+      <label class="label" for="notes">רוצים להוסיף משהו? (לא חובה)</label>
+      <textarea id="notes" maxlength="500"></textarea>
+    </div>
+
+    <p class="error-msg" id="form-error" hidden></p>
+    <button type="button" class="primary" id="submit" disabled>שליחה</button>
+  </section>
+
+  <section id="done" class="center" hidden>
+    <div class="big-emoji" id="done-emoji"></div>
+    <h2 id="done-title" style="font-family:'Frank Ruhl Libre',serif;margin:0 0 8px"></h2>
+    <p id="done-text" style="color:var(--muted)"></p>
+    <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>ניווט עם Waze 🚗</a>
+    <button type="button" class="secondary" id="edit">עדכון התשובה</button>
+  </section>
+</main>
+
+<script>
+  // ===================== הגדרות — לערוך כאן =====================
+  const CONFIG = {
+    // כתובת ה-Web App של Apps Script (נגמרת ב-/exec). כשהשדה ריק, הדף עובד במצב הדגמה.
+    API_URL: '',
+    COUPLE: 'ידין & ויקטוריה',
+    DATE_PARTS: ['26', '11', '2026'],
+    DATE_LINE: 'יום חמישי · ט״ז בכסלו תשפ״ז',
+    VENUE_TEXT: 'חוות אלנבי · נצר סרני',
+    RECEPTION_TIME: '19:30', // אם השדות ריקים, שורת השעות לא מוצגת
+    CHUPPAH_TIME: '20:30',
+    INVITE_IMAGE: '',   // אופציונלי: תמונת ההזמנה המעוצבת, למשל 'invite.jpg'
+    WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
+  };
+  // ================================================================
+
+  const $ = s => document.querySelector(s);
+  const id = new URLSearchParams(location.search).get('id');
+  const demo = !CONFIG.API_URL || id === 'demo';
+  const state = { status: '', count: 1, veg: 0, vegan: 0, gf: 0, max: 2 };
+
+  $('#couple').textContent = CONFIG.COUPLE;
+  $('#date').innerHTML = CONFIG.DATE_PARTS.map(p => `<span>${p}</span>`).join('<i></i>');
+  $('#date-line').textContent = CONFIG.DATE_LINE;
+  $('#venue').textContent = CONFIG.VENUE_TEXT;
+  if (CONFIG.RECEPTION_TIME || CONFIG.CHUPPAH_TIME) {
+    $('#t-reception').textContent = CONFIG.RECEPTION_TIME;
+    $('#t-chuppah').textContent = CONFIG.CHUPPAH_TIME;
+    $('#times').hidden = false;
+  }
+  if (CONFIG.INVITE_IMAGE) {
+    $('#invite-img').src = CONFIG.INVITE_IMAGE;
+    $('#invite-img').hidden = false;
+  }
+
+  function show(name) {
+    for (const s of ['loading', 'error', 'form-view', 'done']) $('#' + s).hidden = s !== name;
+  }
+
+  async function loadGuest() {
+    if (demo) return { ok: true, name: 'אורח לדוגמה', max: 4, response: null };
+    const res = await fetch(`${CONFIG.API_URL}?id=${encodeURIComponent(id)}`);
+    return res.json();
+  }
+
+  async function saveResponse(payload) {
+    if (demo) {
+      console.log('demo submit', payload);
+      await new Promise(r => setTimeout(r, 500));
+      return { ok: true };
+    }
+    // text/plain כדי להימנע מבקשת CORS preflight, ש-Apps Script לא תומך בה
+    const res = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+    return res.json();
+  }
+
+  // ---------- steppers ----------
+  document.querySelectorAll('.stepper').forEach(el => {
+    el.innerHTML = '<button type="button" data-d="1" aria-label="הוספה">+</button><output></output><button type="button" data-d="-1" aria-label="הפחתה">−</button>';
+    el.addEventListener('click', e => {
+      const d = Number(e.target.dataset.d);
+      if (!d) return;
+      state[el.dataset.key] += d;
+      render();
+    });
+  });
+
+  function render() {
+    // count קודם, כי שאר המונים מוגבלים לפיו
+    document.querySelectorAll('.stepper').forEach(el => {
+      const k = el.dataset.key;
+      const min = k === 'count' ? 1 : 0;
+      const max = k === 'count' ? state.max : state.count;
+      state[k] = Math.min(Math.max(state[k], min), max);
+      el.querySelector('output').textContent = state[k];
+      el.querySelector('[data-d="-1"]').disabled = state[k] <= min;
+      el.querySelector('[data-d="1"]').disabled = state[k] >= max;
+    });
+    document.querySelectorAll('.choice').forEach(b =>
+      b.setAttribute('aria-checked', String(b.dataset.status === state.status)));
+    $('#coming').hidden = state.status !== 'מגיע';
+    $('#notes-field').hidden = !state.status;
+    $('#allergy').hidden = !$('#has-allergy').checked;
+    $('#submit').disabled = !state.status;
+  }
+
+  document.querySelectorAll('.choice').forEach(b =>
+    b.addEventListener('click', () => { state.status = b.dataset.status; render(); }));
+  $('#has-allergy').addEventListener('change', render);
+
+  function formError(msg) {
+    $('#form-error').textContent = msg;
+    $('#form-error').hidden = !msg;
+  }
+
+  $('#submit').addEventListener('click', async () => {
+    const coming = state.status === 'מגיע';
+    const hasAllergy = coming && $('#has-allergy').checked;
+    const allergy = $('#allergy').value.trim();
+    if (hasAllergy && !allergy) return formError('נשמח לדעת לאיזה מזון יש אלרגיה');
+    formError('');
+
+    const btn = $('#submit');
+    btn.disabled = true;
+    btn.textContent = 'שולח...';
+    try {
+      const res = await saveResponse({
+        id,
+        status: state.status,
+        count: coming ? state.count : 0,
+        veg: coming ? state.veg : 0,
+        vegan: coming ? state.vegan : 0,
+        gf: coming ? state.gf : 0,
+        allergy: hasAllergy ? allergy : '',
+        notes: $('#notes').value.trim(),
+      });
+      if (!res.ok) throw new Error(res.error);
+      showDone();
+    } catch (err) {
+      console.error(err);
+      formError('משהו השתבש בשליחה. נסו שוב בעוד רגע 🙏');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'שליחה';
+    }
+  });
+
+  function showDone() {
+    const texts = {
+      'מגיע': ['🥂', 'איזה כיף!', 'מחכים לראות אתכם ב-26.11'],
+      'לא מגיע': ['🤍', 'תודה שעדכנתם', 'נתגעגע! תודה שהודעתם לנו'],
+      'אולי': ['🙏', 'תודה!', 'כשתדעו, אפשר לחזור לאותו קישור ולעדכן'],
+    }[state.status];
+    [$('#done-emoji').textContent, $('#done-title').textContent, $('#done-text').textContent] = texts;
+    $('#waze').hidden = !(state.status === 'מגיע' && CONFIG.WAZE_URL);
+    $('#waze').href = CONFIG.WAZE_URL;
+    show('done');
+  }
+
+  $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show('form-view'); });
+
+  // ---------- init ----------
+  (async () => {
+    if (!id && !demo) return show('error');
+    try {
+      const g = await loadGuest();
+      if (!g.ok) return show('error');
+      $('#guest-name').textContent = g.name;
+      state.max = Number(g.max) || 2;
+      const r = g.response;
+      if (r) {
+        Object.assign(state, {
+          status: r.status,
+          count: Number(r.count) || 1,
+          veg: Number(r.veg) || 0,
+          vegan: Number(r.vegan) || 0,
+          gf: Number(r.gf) || 0,
+        });
+        $('#has-allergy').checked = !!r.allergy;
+        $('#allergy').value = r.allergy || '';
+        $('#notes').value = r.notes || '';
+        $('#prev-note').hidden = false;
+      }
+      render();
+      show('form-view');
+    } catch (err) {
+      console.error(err);
+      $('#error-text').textContent = 'לא הצלחנו לטעון את ההזמנה. נסו לרענן את הדף.';
+      show('error');
+    }
+  })();
+</script>
+</body>
+</html>
