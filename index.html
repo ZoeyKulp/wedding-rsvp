@@ -152,7 +152,7 @@
   </section>
 
   <section id="form-view" hidden>
-    <p class="greet">היי <strong id="guest-name"></strong>, נשמח לדעת אם תגיעו 🤍</p>
+    <p class="greet"><span id="greet-hi">היי!</span> נשמח לדעת אם תגיעו 🤍</p>
     <p class="note" id="prev-note" hidden>כבר אישרתם. אפשר לעדכן את התשובה כאן.</p>
 
     <div class="choices" role="radiogroup" aria-label="האם תגיעו?">
@@ -251,10 +251,12 @@
       return { ok: true };
     }
     // text/plain כדי להימנע מבקשת CORS preflight, ש-Apps Script לא תומך בה
+    // keepalive: הבקשה ממשיכה גם אם האורח סוגר את הדף מיד אחרי השליחה
     const res = await fetch(CONFIG.API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
+      keepalive: true,
     });
     return res.json();
   }
@@ -289,8 +291,10 @@
     $('#submit').disabled = !state.status;
   }
 
+  // האורח כבר התחיל למלא, אז לא דורסים לו את הטופס בתשובה קודמת שהגיעה באיחור
+  let touched = false;
   document.querySelectorAll('.choice').forEach(b =>
-    b.addEventListener('click', () => { state.status = b.dataset.status; render(); }));
+    b.addEventListener('click', () => { touched = true; state.status = b.dataset.status; render(); }));
   $('#has-allergy').addEventListener('change', render);
 
   function formError(msg) {
@@ -305,9 +309,8 @@
     if (hasAllergy && !allergy) return formError('נשמח לדעת לאיזה מזון יש אלרגיה');
     formError('');
 
-    const btn = $('#submit');
-    btn.disabled = true;
-    btn.textContent = 'שולח...';
+    // השרת איטי, אז מראים תודה מיד ושומרים ברקע. אם השמירה נכשלת, חוזרים לטופס.
+    showDone();
     try {
       const res = await saveResponse({
         id,
@@ -320,13 +323,10 @@
         notes: $('#notes').value.trim(),
       });
       if (!res.ok) throw new Error(res.error);
-      showDone();
     } catch (err) {
       console.error(err);
-      formError('משהו השתבש בשליחה. נסו שוב בעוד רגע 🙏');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'שליחה';
+      formError('אופס, התשובה לא נשמרה. נסו לשלוח שוב 🙏');
+      show('form-view');
     }
   });
 
@@ -345,15 +345,21 @@
   $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show('form-view'); });
 
   // ---------- init ----------
+  // הטופס מוצג מיד, ופרטי האורח נטענים ברקע (השרת יכול לקחת כמה שניות)
   (async () => {
     if (!id && !demo) return show('error');
+    render();
+    show('form-view');
     try {
       const g = await loadGuest();
       if (!g.ok) return show('error');
-      $('#guest-name').textContent = g.name;
+      const hi = $('#greet-hi');
+      hi.textContent = 'היי ';
+      hi.appendChild(document.createElement('strong')).textContent = g.name;
+      hi.append(',');
       state.max = Number(g.max) || 2;
       const r = g.response;
-      if (r) {
+      if (r && !touched) {
         Object.assign(state, {
           status: r.status,
           count: Number(r.count) || 1,
@@ -367,11 +373,9 @@
         $('#prev-note').hidden = false;
       }
       render();
-      show('form-view');
     } catch (err) {
+      // לא חוסמים את האורח: אפשר עדיין לשלוח, והשרת יבדוק את המזהה
       console.error(err);
-      $('#error-text').textContent = 'לא הצלחנו לטעון את ההזמנה. נסו לרענן את הדף.';
-      show('error');
     }
   })();
 </script>
