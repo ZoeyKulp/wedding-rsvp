@@ -104,6 +104,7 @@ function setup() {
   sum.setColumnWidth(2, 320);
   sum.getRange(summary.length, 2).setWrap(true);
 
+  installWarmup_();
   SpreadsheetApp.getUi().alert('הגיליון מוכן ✅\nעכשיו אפשר להדביק שמות וטלפונים בגיליון "מוזמנים".');
 }
 
@@ -157,6 +158,8 @@ function generateLinks() {
 
   sh.getRange(2, C.id + 1, n, 1).setValues(ids);
   sh.getRange(2, C.send + 1, n, 1).setFormulas(links);
+  installWarmup_();
+  warmUp();
 
   let msg = `נוצרו ${made} קישורי שליחה ✅`;
   if (badPhones.length) msg += `\n\nמספר טלפון חסר או לא תקין אצל:\n${badPhones.join('\n')}`;
@@ -167,10 +170,22 @@ function generateLinks() {
 
 /** GET ?id=xxx → פרטי האורח ותשובה קודמת (אם יש) */
 function doGet(e) {
-  const found = findGuest_((e.parameter || {}).id);
+  const id = String((e.parameter || {}).id || '').trim();
+  if (!id) return json_({ ok: false, error: 'not_found' });
+
+  // קודם מהזיכרון המהיר, כדי לא לפתוח את הגיליון (זה החלק האיטי)
+  const cached = CacheService.getScriptCache().get(CACHE_PREFIX + id);
+  if (cached) return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
+
+  const found = findGuest_(id);
   if (!found) return json_({ ok: false, error: 'not_found' });
-  const r = found.row;
-  return json_({
+  const payload = guestPayload_(found.row);
+  cacheGuest_(id, payload);
+  return json_(payload);
+}
+
+function guestPayload_(r) {
+  return {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
@@ -185,7 +200,7 @@ function doGet(e) {
           notes: r[C.notes],
         }
       : null,
-  });
+  };
 }
 
 /** POST {id, status, count, veg, vegan, gf, allergy, notes} → שומר לגיליון */
@@ -217,6 +232,8 @@ function doPost(e) {
       new Date(),
     ];
     guestsSheet_().getRange(found.rowNum, C.status + 1, 1, values.length).setValues([values]);
+    found.row.splice(C.status, values.length, ...values);
+    cacheGuest_(found.row[C.id], guestPayload_(found.row));
     return json_({ ok: true });
   } finally {
     lock.releaseLock();
@@ -233,11 +250,42 @@ function findGuest_(id) {
   id = String(id || '').trim();
   if (!id) return null;
   const sh = guestsSheet_();
+  // מחפש רק בעמודת המזהה, במקום לקרוא את כל הגיליון
+  const cell = sh.getRange(2, C.id + 1, sh.getMaxRows() - 1, 1)
+    .createTextFinder(id).matchEntireCell(true).findNext();
+  if (!cell) return null;
+  const rowNum = cell.getRow();
+  return { row: sh.getRange(rowNum, 1, 1, COLUMNS.length).getValues()[0], rowNum };
+}
+
+// ---------------------- מהירות: זיכרון מהיר + חימום ----------------------
+
+const CACHE_PREFIX = 'g:';
+const CACHE_SECONDS = 6 * 60 * 60; // המקסימום ש-Google מאפשר
+
+function cacheGuest_(id, payload) {
+  CacheService.getScriptCache().put(CACHE_PREFIX + id, JSON.stringify(payload), CACHE_SECONDS);
+}
+
+/**
+ * רץ כל 5 דקות (טיימר): שומר את כל המוזמנים בזיכרון המהיר ומונע מהשרת "להירדם".
+ * שינויים ידניים בגיליון (למשל מקסימום אורחים) נכנסים לזיכרון תוך 5 דקות לכל היותר.
+ */
+function warmUp() {
+  const sh = guestsSheet_();
   const n = sh.getLastRow() - 1;
-  if (n < 1) return null;
-  const data = sh.getRange(2, 1, n, COLUMNS.length).getValues();
-  const i = data.findIndex(r => String(r[C.id]).trim() === id);
-  return i === -1 ? null : { row: data[i], rowNum: i + 2 };
+  if (n < 1) return;
+  const entries = {};
+  sh.getRange(2, 1, n, COLUMNS.length).getValues().forEach(r => {
+    const id = String(r[C.id]).trim();
+    if (id && String(r[C.name]).trim()) entries[CACHE_PREFIX + id] = JSON.stringify(guestPayload_(r));
+  });
+  CacheService.getScriptCache().putAll(entries, CACHE_SECONDS);
+}
+
+function installWarmup_() {
+  const exists = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'warmUp');
+  if (!exists) ScriptApp.newTrigger('warmUp').timeBased().everyMinutes(5).create();
 }
 
 function maxGuests_(row) {
