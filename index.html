@@ -250,15 +250,18 @@
       await new Promise(r => setTimeout(r, 500));
       return { ok: true };
     }
-    // text/plain כדי להימנע מבקשת CORS preflight, ש-Apps Script לא תומך בה
-    // keepalive: הבקשה ממשיכה גם אם האורח סוגר את הדף מיד אחרי השליחה
-    const res = await fetch(CONFIG.API_URL, {
+    // Apps Script עונה ל-POST בהפניה (redirect), וחלק מהדפדפנים בטלפון חוסמים את קריאת
+    // התשובה למרות שהשמירה הצליחה. לכן no-cors: לא קוראים את התשובה, ורק שגיאת רשת
+    // אמיתית (למשל אין אינטרנט) נחשבת כישלון. הבדיקות עצמן נעשות בשרת.
+    // keepalive: הבקשה ממשיכה גם אם האורח סוגר את הדף מיד אחרי השליחה.
+    await fetch(CONFIG.API_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       keepalive: true,
     });
-    return res.json();
+    return { ok: true };
   }
 
   // ---------- steppers ----------
