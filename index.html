@@ -117,6 +117,11 @@
   }
   .error-msg { color: var(--danger); text-align: center; font-weight: 600; }
 
+  .gift { margin: 22px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .gift-title { margin: 0 0 12px; font-weight: 600; }
+  .gift-btn { display: block; text-decoration: none; text-align: center; background: var(--gold); }
+  .bit-copy { font-size: 18px; margin-top: 0; }
+
   .center { text-align: center; }
   .big-emoji { font-size: 54px; margin: 8px 0; }
   .spinner {
@@ -196,6 +201,16 @@
     <h2 id="done-title" style="font-family:'Frank Ruhl Libre',serif;margin:0 0 8px"></h2>
     <p id="done-text" style="color:var(--muted)"></p>
     <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>ניווט עם Waze 🚗</a>
+
+    <div class="gift" id="gift" hidden>
+      <p class="gift-title" id="gift-title"></p>
+      <a class="primary gift-btn" id="gift-paybox" target="_blank" rel="noopener" hidden>למתנה ב־PayBox 🎁</a>
+      <div id="gift-bit" hidden>
+        <p class="hint" style="margin:0 0 8px">אפשר להעביר בביט למספר</p>
+        <button type="button" class="secondary bit-copy" id="bit-copy"></button>
+      </div>
+    </div>
+
     <button type="button" class="secondary" id="edit">עדכון התשובה</button>
   </section>
 </main>
@@ -240,7 +255,7 @@
   }
 
   async function loadGuest() {
-    if (demo) return { ok: true, name: 'אורח לדוגמה', max: 4, response: null };
+    if (demo) return { ok: true, name: 'אורח לדוגמה', max: 4, response: null, gift: { paybox: 'https://example.com', bit: '050-1234567' } };
     const res = await fetch(`${CONFIG.API_URL}?id=${encodeURIComponent(id)}`);
     return res.json();
   }
@@ -343,8 +358,43 @@
     [$('#done-emoji').textContent, $('#done-title').textContent, $('#done-text').textContent] = texts;
     $('#waze').hidden = !(state.status === 'מגיע' && CONFIG.WAZE_URL);
     $('#waze').href = CONFIG.WAZE_URL;
+    renderGift();
     show('done');
   }
+
+  // פרטי המתנה מגיעים מהשרת יחד עם פרטי האורח, ולא כתובים באתר (הוא ציבורי)
+  let gift = null;
+  function renderGift() {
+    const visible = gift && (state.status === 'מגיע' || state.status === 'לא מגיע');
+    $('#gift').hidden = !visible;
+    if (!visible) return;
+    $('#gift-title').textContent = state.status === 'מגיע'
+      ? 'רוצים לשלוח מתנה מראש? 🎁'
+      : 'רוצים לשלוח מתנה לזוג? 🎁';
+    const paybox = /^https:\/\//.test(gift.paybox || '') ? gift.paybox : '';
+    $('#gift-paybox').hidden = !paybox;
+    $('#gift-paybox').href = paybox || '#';
+    $('#gift-bit').hidden = !gift.bit;
+    const btn = $('#bit-copy');
+    btn.textContent = '';
+    if (gift.bit) {
+      const num = btn.appendChild(document.createElement('bdi'));
+      num.dir = 'ltr';
+      num.textContent = gift.bit;
+      btn.append(' · העתקה 📋');
+    }
+  }
+
+  $('#bit-copy').addEventListener('click', async () => {
+    const btn = $('#bit-copy');
+    try {
+      await navigator.clipboard.writeText(gift.bit.replace(/\D/g, ''));
+      btn.textContent = 'המספר הועתק ✓';
+    } catch (_) {
+      btn.textContent = gift.bit; // אם ההעתקה נחסמה, לפחות שהמספר יהיה גלוי
+    }
+    setTimeout(renderGift, 2000);
+  });
 
   $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show('form-view'); });
 
@@ -362,6 +412,8 @@
       hi.appendChild(document.createElement('strong')).textContent = g.name;
       hi.append(',');
       state.max = Number(g.max) || 2;
+      gift = g.gift || null;
+      renderGift(); // למקרה שהאורח כבר שלח לפני שהפרטים הגיעו
       const r = g.response;
       if (r && !touched) {
         Object.assign(state, {

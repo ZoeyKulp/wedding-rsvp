@@ -3,7 +3,7 @@
  *
  * הקובץ הזה מודבק ב-Extensions > Apps Script של גיליון ה-Google Sheets.
  * הוא עושה שלושה דברים:
- *   1. מוסיף לגיליון תפריט "💍 אישורי הגעה" (הגדרה ראשונית + יצירת קישורי וואטסאפ)
+ *   1. מוסיף לגיליון תפריט "💍 אישורי הגעה" (הגדרה ראשונית, קישורי וואטסאפ ותזכורות)
  *   2. doGet  — האתר שואל "מי האורח עם המזהה הזה?"
  *   3. doPost — האתר שולח את התשובה של האורח, והיא נכתבת לגיליון
  */
@@ -25,6 +25,29 @@ const INVITE_MESSAGE =
 
 // כמה אנשים מותר לאשר כברירת מחדל, אם העמודה "מקסימום אורחים" ריקה
 const DEFAULT_MAX_GUESTS = 2;
+
+// מתנה: ממלאים אחד מהשניים. אם שניהם ריקים, כפתור המתנה לא יופיע בכלל.
+// הפרטים נשמרים כאן ולא באתר, כי האתר ציבורי.
+const GIFT_PAYBOX_URL = ''; // קישור לקבוצת PayBox
+const GIFT_BIT_PHONE = '';  // או: מספר לביט, למשל '050-1234567'
+
+const WAZE_URL = 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני');
+
+// תזכורת למי שעוד לא ענה (או ענה "אולי"). {link} = הקישור האישי.
+const NUDGE_MESSAGE =
+  'היי {name} 🤍\n' +
+  'רק מזכירים: נשמח לדעת אם תגיעו לחתונה של ידין וויקטוריה ב-26.11 💍\n' +
+  'לאישור הגעה 👇\n' +
+  '{link}';
+
+// תזכורת ביום החתונה, למי שאישר הגעה. {gift} = שורת המתנה (אם הוגדרה).
+const DAY_MESSAGE =
+  'היי {name}! 🎉\n' +
+  'היום זה קורה! מחכים לראות אתכם הערב בחוות אלנבי, נצר סרני 💍\n' +
+  'קבלת פנים 19:30 · חופה 20:30\n\n' +
+  'ניווט ב-Waze 🚗\n' +
+  '{waze}' +
+  '{gift}';
 
 // ================================================================
 
@@ -48,6 +71,7 @@ const COLUMNS = [
   ['send', 'שליחה'],
   ['sent', 'נשלח'],
   ['id', 'מזהה'],
+  ['remind', 'תזכורת'],
 ];
 const C = Object.fromEntries(COLUMNS.map(([key], i) => [key, i]));
 const letter_ = key => String.fromCharCode(65 + C[key]);
@@ -59,6 +83,9 @@ function onOpen() {
     .createMenu('💍 אישורי הגעה')
     .addItem('הגדרה ראשונית', 'setup')
     .addItem('צור קישורי שליחה', 'generateLinks')
+    .addSeparator()
+    .addItem('תזכורת: למי שעוד לא ענה', 'remindPending')
+    .addItem('תזכורת: יום החתונה (למגיעים)', 'remindWeddingDay')
     .addToUi();
 }
 
@@ -150,10 +177,7 @@ function generateLinks() {
       links.push(['']);
       return;
     }
-    const text = INVITE_MESSAGE.replace('{name}', name).replace('{link}', SITE_URL + '?id=' + id);
-    // ישר ל-WhatsApp Web, בלי wa.me: ההפניה של wa.me משבשת אימוג'ים להודעה עם �
-    const wa = 'https://web.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(text);
-    links.push([`=HYPERLINK("${wa}","שלח בוואטסאפ 📲")`]);
+    links.push([`=HYPERLINK("${waLink_(phone, fillMessage_(INVITE_MESSAGE, name, id))}","שלח בוואטסאפ 📲")`]);
     made++;
   });
 
@@ -165,6 +189,62 @@ function generateLinks() {
   let msg = `נוצרו ${made} קישורי שליחה ✅`;
   if (badPhones.length) msg += `\n\nמספר טלפון חסר או לא תקין אצל:\n${badPhones.join('\n')}`;
   ui.alert(msg);
+}
+
+// ---------------------- תזכורות ----------------------
+
+function remindPending() {
+  generateReminders_(r => !r[C.status] || r[C.status] === 'אולי', NUDGE_MESSAGE, 'למי שעוד לא ענה');
+}
+
+function remindWeddingDay() {
+  generateReminders_(r => r[C.status] === 'מגיע', DAY_MESSAGE, 'ליום החתונה');
+}
+
+/** ממלא את עמודת "תזכורת" בקישורי וואטסאפ, רק לשורות שעומדות בתנאי */
+function generateReminders_(shouldRemind, template, label) {
+  const ui = SpreadsheetApp.getUi();
+  const sh = guestsSheet_();
+  const n = sh.getLastRow() - 1;
+  if (n < 1) {
+    ui.alert('אין מוזמנים בגיליון עדיין.');
+    return;
+  }
+  // לגיליונות שנוצרו לפני שהייתה עמודת תזכורת
+  sh.getRange(1, C.remind + 1).setValue('תזכורת').setFontWeight('bold').setBackground('#e7ebe0');
+
+  let made = 0;
+  const links = sh.getRange(2, 1, n, COLUMNS.length).getValues().map(r => {
+    const name = String(r[C.name]).trim();
+    const id = String(r[C.id]).trim();
+    const phone = normalizePhone_(r[C.phone]);
+    if (!name || !id || !phone || !shouldRemind(r)) return [''];
+    made++;
+    return [`=HYPERLINK("${waLink_(phone, fillMessage_(template, name, id))}","שלח תזכורת 🔔")`];
+  });
+  sh.getRange(2, C.remind + 1, n, 1).setFormulas(links);
+  ui.alert(`נוצרו ${made} קישורי תזכורת ${label} ✅\nהם בעמודה "תזכורת".`);
+}
+
+// ---------------------- הודעות וואטסאפ ----------------------
+
+function fillMessage_(template, name, id) {
+  return template
+    .split('{name}').join(name)
+    .split('{link}').join(SITE_URL + '?id=' + id)
+    .split('{waze}').join(WAZE_URL)
+    .split('{gift}').join(giftLine_());
+}
+
+function giftLine_() {
+  if (GIFT_PAYBOX_URL) return '\n\nלמתנה לזוג 🎁\n' + GIFT_PAYBOX_URL;
+  if (GIFT_BIT_PHONE) return '\n\nלמתנה לזוג 🎁 ביט למספר ' + GIFT_BIT_PHONE;
+  return '';
+}
+
+/** ישר ל-WhatsApp Web, בלי wa.me: ההפניה של wa.me משבשת אימוג'ים להודעה עם � */
+function waLink_(phone, text) {
+  return 'https://web.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(text);
 }
 
 // ---------------------- API לאתר ----------------------
@@ -190,6 +270,7 @@ function guestPayload_(r) {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
+    gift: GIFT_PAYBOX_URL || GIFT_BIT_PHONE ? { paybox: GIFT_PAYBOX_URL, bit: GIFT_BIT_PHONE } : null,
     response: r[C.status]
       ? {
           status: r[C.status],
