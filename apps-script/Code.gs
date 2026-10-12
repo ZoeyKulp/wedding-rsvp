@@ -251,7 +251,7 @@ function setupGift() {
   const current = giftConfig_();
   const res = ui.prompt(
     '🎁 פרטי מתנה',
-    'מספר טלפון לביט, או קישור לקבוצת PayBox.\n' +
+    'מספר טלפון לביט, או קישור תשלום (קישור אישי מביט / קבוצת PayBox).\n' +
       'כדי להסיר את כפתור המתנה, משאירים ריק.' +
       (current ? `\n\nכרגע מוגדר: ${current.paybox || current.bit}` : ''),
     ui.ButtonSet.OK_CANCEL

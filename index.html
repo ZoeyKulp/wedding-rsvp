@@ -372,9 +372,14 @@
     $('#gift-title').textContent = state.status === 'מגיע'
       ? 'רוצים לשלוח מתנה מראש? 🎁'
       : 'רוצים לשלוח מתנה לזוג? 🎁';
-    const paybox = /^https:\/\//.test(gift.paybox || '') ? gift.paybox : '';
-    $('#gift-paybox').hidden = !paybox;
-    $('#gift-paybox').href = paybox || '#';
+    // gift.paybox = קישור תשלום כלשהו (קבוצת PayBox או קישור אישי מביט)
+    const link = /^https:\/\//.test(gift.paybox || '') ? gift.paybox : '';
+    const linkBtn = $('#gift-paybox');
+    linkBtn.hidden = !link;
+    linkBtn.href = link || '#';
+    linkBtn.textContent = /paybox/i.test(link) ? 'למתנה ב־PayBox 🎁'
+      : /bit/i.test(link) ? 'למתנה בביט 🎁'
+      : 'לשליחת מתנה 🎁';
     $('#gift-bit').hidden = !gift.bit;
     const btn = $('#bit-copy');
     btn.textContent = '';
