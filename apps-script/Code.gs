@@ -26,10 +26,8 @@ const INVITE_MESSAGE =
 // כמה אנשים מותר לאשר כברירת מחדל, אם העמודה "מקסימום אורחים" ריקה
 const DEFAULT_MAX_GUESTS = 2;
 
-// מתנה: ממלאים אחד מהשניים. אם שניהם ריקים, כפתור המתנה לא יופיע בכלל.
-// הפרטים נשמרים כאן ולא באתר, כי האתר ציבורי.
-const GIFT_PAYBOX_URL = ''; // קישור לקבוצת PayBox
-const GIFT_BIT_PHONE = '';  // או: מספר לביט, למשל '050-1234567'
+// פרטי המתנה (ביט / PayBox) לא נכתבים כאן, כי הקוד הזה נמצא בגיטהאב הציבורי.
+// מגדירים אותם מהגיליון: 💍 אישורי הגעה ← 🎁 הגדרת פרטי מתנה.
 
 const WAZE_URL = 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'); // כתיב החיפוש ש-Waze מכיר
 
@@ -86,6 +84,8 @@ function onOpen() {
     .addSeparator()
     .addItem('תזכורת: למי שעוד לא ענה', 'remindPending')
     .addItem('תזכורת: יום החתונה (למגיעים)', 'remindWeddingDay')
+    .addSeparator()
+    .addItem('🎁 הגדרת פרטי מתנה', 'setupGift')
     .addToUi();
 }
 
@@ -237,9 +237,59 @@ function fillMessage_(template, name, id) {
 }
 
 function giftLine_() {
-  if (GIFT_PAYBOX_URL) return '\n\nלמתנה לזוג 🎁\n' + GIFT_PAYBOX_URL;
-  if (GIFT_BIT_PHONE) return '\n\nלמתנה לזוג 🎁 ביט למספר ' + GIFT_BIT_PHONE;
-  return '';
+  const gift = giftConfig_();
+  if (!gift) return '';
+  if (gift.paybox) return '\n\nלמתנה לזוג 🎁\n' + gift.paybox;
+  return '\n\nלמתנה לזוג 🎁 ביט למספר ' + gift.bit;
+}
+
+// ---------------------- מתנה ----------------------
+
+/** שומר את פרטי המתנה ב-Script Properties: נשארים בגוגל בלבד, ולא נמחקים כשמדביקים קוד חדש */
+function setupGift() {
+  const ui = SpreadsheetApp.getUi();
+  const current = giftConfig_();
+  const res = ui.prompt(
+    '🎁 פרטי מתנה',
+    'מספר טלפון לביט, או קישור לקבוצת PayBox.\n' +
+      'כדי להסיר את כפתור המתנה, משאירים ריק.' +
+      (current ? `\n\nכרגע מוגדר: ${current.paybox || current.bit}` : ''),
+    ui.ButtonSet.OK_CANCEL
+  );
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+
+  const value = res.getResponseText().trim();
+  const props = PropertiesService.getScriptProperties();
+  const digits = value.replace(/\D/g, '');
+  if (!value) {
+    props.deleteProperty('GIFT_PAYBOX_URL');
+    props.deleteProperty('GIFT_BIT_PHONE');
+  } else if (/^https:\/\//.test(value)) {
+    props.setProperty('GIFT_PAYBOX_URL', value);
+    props.deleteProperty('GIFT_BIT_PHONE');
+  } else if (/^05\d{8}$/.test(digits)) {
+    props.setProperty('GIFT_BIT_PHONE', digits.slice(0, 3) + '-' + digits.slice(3));
+    props.deleteProperty('GIFT_PAYBOX_URL');
+  } else {
+    ui.alert('לא זיהיתי את מה שהוזן. צריך מספר נייד (למשל 050-1234567) או קישור שמתחיל ב-https://');
+    return;
+  }
+  giftCache_ = undefined;
+  warmUp(); // שהאורחים יראו את השינוי מיד, ולא בעוד 5 דקות
+  const gift = giftConfig_();
+  ui.alert(gift ? `נשמר ✅\nכפתור המתנה יציג: ${gift.paybox || 'ביט ' + gift.bit}` : 'כפתור המתנה הוסר ✅');
+}
+
+let giftCache_;
+/** קורא פעם אחת לכל הרצה (יש מכסה יומית לקריאות מ-Properties) */
+function giftConfig_() {
+  if (giftCache_ === undefined) {
+    const p = PropertiesService.getScriptProperties().getProperties();
+    giftCache_ = p.GIFT_PAYBOX_URL || p.GIFT_BIT_PHONE
+      ? { paybox: p.GIFT_PAYBOX_URL || '', bit: p.GIFT_BIT_PHONE || '' }
+      : null;
+  }
+  return giftCache_;
 }
 
 /** ישר ל-WhatsApp Web, בלי wa.me: ההפניה של wa.me משבשת אימוג'ים להודעה עם � */
@@ -270,7 +320,7 @@ function guestPayload_(r) {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
-    gift: GIFT_PAYBOX_URL || GIFT_BIT_PHONE ? { paybox: GIFT_PAYBOX_URL, bit: GIFT_BIT_PHONE } : null,
+    gift: giftConfig_(),
     response: r[C.status]
       ? {
           status: r[C.status],
