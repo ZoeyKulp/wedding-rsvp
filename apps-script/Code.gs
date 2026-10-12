@@ -1,4 +1,4 @@
-﻿/**
+/**
  * מערכת אישורי הגעה לחתונה — צד שרת (Google Apps Script)
  *
  * הקובץ הזה מודבק ב-Extensions > Apps Script של גיליון ה-Google Sheets.
@@ -18,7 +18,7 @@ const INVITE_MESSAGE =
   'היי {name}! 🤍\n' +
   'הוזמנתם לחתונה של ידין וויקטוריה 💍\n\n' +
   'האירוע יתקיים ביום חמישי, 26.11.26\n' +
-  'בחוות אלנבי, נצר סרני\n\n' +
+  'בחוות אלנבי, נצר סירני\n\n' +
   'נשמח לדעת אם תגיעו 🙏\n' +
   'לאישור הגעה לחצו כאן 👇\n' +
   '{link}';
@@ -31,7 +31,7 @@ const DEFAULT_MAX_GUESTS = 2;
 const GIFT_PAYBOX_URL = ''; // קישור לקבוצת PayBox
 const GIFT_BIT_PHONE = '';  // או: מספר לביט, למשל '050-1234567'
 
-const WAZE_URL = 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני');
+const WAZE_URL = 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'); // כתיב החיפוש ש-Waze מכיר
 
 // תזכורת למי שעוד לא ענה (או ענה "אולי"). {link} = הקישור האישי.
 const NUDGE_MESSAGE =
@@ -43,7 +43,7 @@ const NUDGE_MESSAGE =
 // תזכורת ביום החתונה, למי שאישר הגעה. {gift} = שורת המתנה (אם הוגדרה).
 const DAY_MESSAGE =
   'היי {name}! 🎉\n' +
-  'היום זה קורה! מחכים לראות אתכם הערב בחוות אלנבי, נצר סרני 💍\n' +
+  'היום זה קורה! מחכים לראות אתכם הערב בחוות אלנבי, נצר סירני 💍\n' +
   'קבלת פנים 19:30 · חופה 20:30\n\n' +
   'ניווט ב-Waze 🚗\n' +
   '{waze}' +

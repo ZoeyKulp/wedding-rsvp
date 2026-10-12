@@ -6,7 +6,7 @@
 <title>החתונה של ידין וויקטוריה</title>
 <!-- התצוגה המקדימה שוואטסאפ מציג מעל הקישור -->
 <meta property="og:title" content="ידין & ויקטוריה מתחתנים 💍">
-<meta property="og:description" content="26.11.2026 · חוות אלנבי, נצר סרני · לחצו לאישור הגעה">
+<meta property="og:description" content="26.11.2026 · חוות אלנבי, נצר סירני · לחצו לאישור הגעה">
 <!-- כתובת מלאה (לא יחסית!) לתמונה. נוצרה מ-tools/og-card.html -->
 <meta property="og:image" content="https://zoeykulp.github.io/wedding-rsvp/invite.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -17,15 +17,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f0e8;
+    --bg: #eef0f3;
     --card: #fffdf9;
     --ink: #2b2a27;
     --muted: #7a756c;
-    --line: #e6dfd3;
-    --accent: #5b6b4e;
+    --line: #dde2ea;
+    --accent: #42567b;
     --accent-ink: #ffffff;
-    --accent-soft: #e9ede3;
-    --gold: #b08d57;
+    --accent-soft: #e6ebf3;
+    --gold: #8a9cbd;
     --danger: #a14a3b;
   }
   * { box-sizing: border-box; }
@@ -222,11 +222,11 @@
     API_URL: 'https://script.google.com/macros/s/AKfycby4lBLsoiZYVjXAd-NYE6aGGlSZyExb31CJywgy9NwZ0n9NhZSjGgX4Q7G__cmL5rdeHQ/exec',
     COUPLE: 'ידין & ויקטוריה',
     DATE_PARTS: ['26', '11', '2026'],
-    DATE_LINE: 'יום חמישי · ט״ז בכסלו תשפ״ז',
-    VENUE_TEXT: 'חוות אלנבי · נצר סרני',
+    DATE_LINE: 'יום חמישי · י״ז בכסלו תשפ״ז',
+    VENUE_TEXT: 'חוות אלנבי · נצר סירני',
     RECEPTION_TIME: '19:30', // אם השדות ריקים, שורת השעות לא מוצגת
     CHUPPAH_TIME: '20:30',
-    INVITE_IMAGE: '',   // אופציונלי: תמונת ההזמנה המעוצבת, למשל 'invite.jpg'
+    INVITE_IMAGE: 'invitation.jpg', // ההזמנה המעוצבת. כשיש תמונה, היא מחליפה את הכותרת הטקסטואלית
     WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
   };
   // ================================================================
@@ -248,6 +248,7 @@
   if (CONFIG.INVITE_IMAGE) {
     $('#invite-img').src = CONFIG.INVITE_IMAGE;
     $('#invite-img').hidden = false;
+    document.querySelector('.hero').hidden = true;
   }
 
   function show(name) {
