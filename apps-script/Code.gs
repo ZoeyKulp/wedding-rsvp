@@ -101,7 +101,11 @@ const COLUMNS = [
   ['id', 'מזהה'],
   ['remind', 'תזכורת'],
   ['lang', 'שפה'],
+  ['group', 'קבוצה'],
 ];
+
+// הקבוצות ברשימה הנפתחת של עמודת "קבוצה" ובטבלת הסיכום. אפשר להוסיף או לשנות כאן.
+const GROUPS = ['משפחה', 'חברים של ויקטוריה וידין', 'חברים של ההורים', 'חברים של האחים'];
 const C = Object.fromEntries(COLUMNS.map(([key], i) => [key, i]));
 const letter_ = key => String.fromCharCode(65 + C[key]);
 
@@ -117,6 +121,7 @@ function onOpen() {
     .addItem('תזכורת: יום החתונה (למגיעים)', 'remindWeddingDay')
     .addSeparator()
     .addItem('🎁 הגדרת פרטי מתנה', 'setupGift')
+    .addItem('📊 רענון דף הסיכום', 'refreshSummary')
     .addToUi();
 }
 
@@ -135,9 +140,33 @@ function setup() {
   sh.getRange(2, C.status + 1, rows).setDataValidation(
     SpreadsheetApp.newDataValidation().requireValueInList(STATUSES).setAllowInvalid(false).build()
   );
-  sh.getRange(2, C.sent + 1, rows).insertCheckboxes();
+  // insertCheckboxes מאפס את כל הסימונים, אז רק אם עוד אין תיבות (כדי שהרצה חוזרת לא תמחק את "נשלח")
+  if (!sh.getRange(2, C.sent + 1).getDataValidation()) sh.getRange(2, C.sent + 1, rows).insertCheckboxes();
   sh.getRange(2, C.updated + 1, rows).setNumberFormat('dd/MM HH:mm');
+  setListValidation_(sh);
 
+  buildSummary_();
+  installWarmup_();
+  SpreadsheetApp.getUi().alert('הגיליון מוכן ✅\nעכשיו אפשר להדביק שמות וטלפונים בגיליון "מוזמנים".');
+}
+
+function refreshSummary() {
+  ensureHeaders_(guestsSheet_());
+  buildSummary_();
+  SpreadsheetApp.getUi().alert('דף הסיכום עודכן ✅');
+}
+
+/** רשימות נפתחות לעמודות "שפה" ו"קבוצה" (אפשר גם להקליד ערך אחר) */
+function setListValidation_(sh) {
+  const rows = sh.getMaxRows() - 1;
+  const list = values => SpreadsheetApp.newDataValidation().requireValueInList(values).setAllowInvalid(true).build();
+  sh.getRange(2, C.lang + 1, rows).setDataValidation(list(['עברית', 'אנגלית']));
+  sh.getRange(2, C.group + 1, rows).setDataValidation(list(GROUPS));
+}
+
+/** בונה מחדש את לשונית "סיכום": סיכום כללי בעמודות A-B, ופירוק לפי קבוצות מעמודה D */
+function buildSummary_() {
+  const ss = SpreadsheetApp.getActive();
   const sum = ss.getSheetByName(SUMMARY_SHEET) || ss.insertSheet(SUMMARY_SHEET, 1);
   sum.clear();
   sum.setRightToLeft(true);
@@ -162,8 +191,30 @@ function setup() {
   sum.setColumnWidth(2, 320);
   sum.getRange(summary.length, 2).setWrap(true);
 
-  installWarmup_();
-  SpreadsheetApp.getUi().alert('הגיליון מוכן ✅\nעכשיו אפשר להדביק שמות וטלפונים בגיליון "מוזמנים".');
+  // לפי קבוצות. "ללא קבוצה" תופס את מי שעוד לא שובץ, כדי שהסכומים יתאימו לסיכום הכללי.
+  const byGroup = (criteria, label) => {
+    const g = `${col('group')},${criteria}`;
+    return [
+      label,
+      `=COUNTIFS(${col('name')},"<>",${g})`,
+      `=COUNTIFS(${g},${coming})`,
+      `=SUMIFS(${col('count')},${g},${coming})`,
+      `=COUNTIFS(${g},${col('status')},"לא מגיע")`,
+      `=COUNTIFS(${g},${col('status')},"אולי")`,
+      `=COUNTIFS(${col('name')},"<>",${g},${col('status')},"")`,
+    ];
+  };
+  const groups = [
+    ['קבוצה', 'הוזמנו', 'אישרו', 'אורחים מגיעים', 'לא מגיעים', 'אולי', 'עוד לא ענו'],
+    ...GROUPS.map(name => byGroup(`"${name}"`, name)),
+    byGroup('""', 'ללא קבוצה'),
+  ];
+  const table = sum.getRange(1, 4, groups.length, groups[0].length);
+  table.setValues(groups);
+  sum.getRange(1, 4, 1, groups[0].length).setFontWeight('bold').setBackground('#e6ebf3');
+  sum.getRange(1, 4, groups.length, 1).setFontWeight('bold');
+  sum.setColumnWidth(4, 190);
+  for (let c = 5; c < 4 + groups[0].length; c++) sum.setColumnWidth(c, 95);
 }
 
 // ---------------------- יצירת קישורי וואטסאפ ----------------------
@@ -282,9 +333,8 @@ function ensureHeaders_(sh) {
   const values = header.getValues()[0];
   if (values.every((v, i) => v === COLUMNS[i][1])) return;
   header.setValues([COLUMNS.map(c => c[1])]).setFontWeight('bold').setBackground('#e7ebe0');
-  sh.getRange(2, C.lang + 1, sh.getMaxRows() - 1).setDataValidation(
-    SpreadsheetApp.newDataValidation().requireValueInList(['עברית', 'אנגלית']).setAllowInvalid(true).build()
-  );
+  setListValidation_(sh);
+  buildSummary_(); // נוספו עמודות, אז גם הסיכום צריך להתעדכן
 }
 
 function giftLine_() {
