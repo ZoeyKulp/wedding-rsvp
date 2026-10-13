@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>החתונה של ויקטוריה וידין</title>
-<!-- התצוגה המקדימה שוואטסאפ מציג מעל הקישור -->
+<!-- התצוגה המקדימה שוואטסאפ מציג מעל הקישור. התמונה חייבת כתובת מלאה ולהיות קטנה מ-300KB -->
 <meta property="og:title" content="ויקטוריה &amp; ידין מתחתנים 💍">
 <meta property="og:description" content="26.11.2026 · חוות אלנבי, נצר סירני · לחצו לאישור הגעה">
-<!-- כתובת מלאה (לא יחסית!) לתמונה. נוצרה מ-tools/og-card.html -->
 <meta property="og:image" content="https://zoeykulp.github.io/wedding-rsvp/invite.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
@@ -15,137 +14,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #eef0f3;
-    --card: #fffdf9;
-    --ink: #2b2a27;
-    --muted: #7a756c;
-    --line: #dde2ea;
-    --accent: #42567b;
-    --accent-ink: #ffffff;
-    --accent-soft: #e6ebf3;
-    --gold: #8a9cbd;
-    --danger: #a14a3b;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--ink);
-    font: 17px/1.5 'Assistant', system-ui, sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 24px 16px 48px;
-  }
-  main {
-    width: 100%;
-    max-width: 460px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 32px 22px;
-    box-shadow: 0 10px 30px rgba(60, 50, 30, .07);
-  }
-  [hidden] { display: none !important; }
-
-  .invite-img { display: block; width: 100%; border-radius: 12px; margin-bottom: 22px; }
-  .hero { text-align: center; padding-bottom: 24px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
-  .eyebrow { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
-  h1 { font-family: 'Frank Ruhl Libre', serif; font-size: 38px; line-height: 1.2; margin: 14px 0 16px; font-weight: 700; color: var(--accent); }
-  .date {
-    direction: ltr; display: flex; justify-content: center; align-items: center; gap: 16px;
-    font-family: 'Frank Ruhl Libre', serif; font-size: 34px; font-weight: 500; color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .date i { width: 1px; height: 30px; background: var(--gold); opacity: .6; }
-  .meta { margin: 2px 0; color: var(--muted); }
-  .venue { color: var(--ink); font-weight: 600; margin-top: 6px; }
-  .times { display: flex; justify-content: center; margin-top: 16px; }
-  .times div { display: flex; flex-direction: column; padding: 0 22px; }
-  .times div + div { border-right: 1px solid var(--line); }
-  .times b { font-size: 19px; }
-  .times span { color: var(--muted); font-size: 14px; }
-  .greet { font-size: 19px; text-align: center; margin: 0 0 18px; }
-  .note { background: var(--accent-soft); border-radius: 10px; padding: 8px 12px; font-size: 15px; text-align: center; margin: -6px 0 18px; }
-
-  .choices { display: grid; gap: 10px; margin-bottom: 22px; }
-  .choice {
-    font: inherit; font-weight: 600; font-size: 18px;
-    padding: 14px; border-radius: 14px; cursor: pointer;
-    background: var(--card); color: var(--ink); border: 1.5px solid var(--line);
-    transition: border-color .15s, background .15s;
-  }
-  .choice:hover { border-color: var(--accent); }
-  .choice[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-
-  .field { margin-bottom: 20px; }
-  .label { display: block; font-weight: 600; margin-bottom: 8px; }
-  .hint { color: var(--muted); font-size: 15px; margin: -4px 0 10px; }
-  .row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-  .row + .row { border-top: 1px dashed var(--line); }
-
-  .stepper { display: inline-flex; align-items: center; gap: 4px; }
-  .stepper button {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
-    font-size: 22px; line-height: 1; cursor: pointer;
-  }
-  .stepper button:disabled { opacity: .35; cursor: default; }
-  .stepper output { min-width: 36px; text-align: center; font-size: 20px; font-weight: 700; }
-
-  .check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
-  .check input { width: 20px; height: 20px; accent-color: var(--accent); }
-  textarea {
-    width: 100%; font: inherit; padding: 10px 12px; margin-top: 10px;
-    border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
-    resize: vertical; min-height: 70px;
-  }
-  textarea:focus { outline: none; border-color: var(--accent); }
-
-  .primary {
-    width: 100%; font: inherit; font-weight: 700; font-size: 19px;
-    padding: 15px; border: 0; border-radius: 14px; cursor: pointer;
-    background: var(--accent); color: var(--accent-ink);
-  }
-  .primary:disabled { opacity: .45; cursor: default; }
-  .secondary {
-    display: block; width: 100%; text-align: center; text-decoration: none;
-    font: inherit; font-weight: 600; padding: 13px; margin-top: 10px;
-    border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
-  }
-  .error-msg { color: var(--danger); text-align: center; font-weight: 600; }
-
-  .gift { margin: 22px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); }
-  .gift-title { margin: 0 0 12px; font-weight: 600; }
-  .gift-btn { display: block; text-decoration: none; text-align: center; background: var(--gold); }
-  .bit-copy { font-size: 18px; margin-top: 0; }
-
-  .center { text-align: center; }
-  .big-emoji { font-size: 54px; margin: 8px 0; }
-  .spinner {
-    width: 36px; height: 36px; margin: 40px auto; border-radius: 50%;
-    border: 3px solid var(--line); border-top-color: var(--accent);
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
 <main>
   <img id="invite-img" class="invite-img" alt="ההזמנה לחתונה" hidden>
-  <header class="hero">
-    <p class="eyebrow">שמחים ומתרגשים להזמינכם<br>לחגוג עמנו את נישואינו</p>
-    <h1 id="couple"></h1>
-    <div class="date" id="date"></div>
-    <p class="meta" id="date-line"></p>
-    <p class="meta venue" id="venue"></p>
-    <div class="times" id="times" hidden>
-      <div><b id="t-reception"></b><span>קבלת פנים</span></div>
-      <div><b id="t-chuppah"></b><span>חופה וקידושין</span></div>
-    </div>
-  </header>
 
   <section id="loading" class="center">
     <div class="spinner" aria-label="טוען"></div>
@@ -154,7 +27,7 @@
 
   <section id="error" class="center" hidden>
     <div class="big-emoji">🤔</div>
-    <p id="error-text">הקישור לא תקין. כדאי לבדוק שהעתקתם אותו במלואו מההודעה.</p>
+    <p>הקישור לא תקין. כדאי לבדוק שהעתקתם אותו במלואו מההודעה.</p>
   </section>
 
   <section id="form-view" hidden>
@@ -198,13 +71,13 @@
 
   <section id="done" class="center" hidden>
     <div class="big-emoji" id="done-emoji"></div>
-    <h2 id="done-title" style="font-family:'Frank Ruhl Libre',serif;margin:0 0 8px"></h2>
-    <p id="done-text" style="color:var(--muted)"></p>
+    <h2 class="done-title" id="done-title"></h2>
+    <p class="done-text" id="done-text"></p>
     <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>ניווט עם Waze 🚗</a>
 
     <div class="gift" id="gift" hidden>
       <p class="gift-title" id="gift-title"></p>
-      <a class="primary gift-btn" id="gift-paybox" target="_blank" rel="noopener" hidden>למתנה ב־PayBox 🎁</a>
+      <a class="primary gift-btn" id="gift-paybox" target="_blank" rel="noopener" hidden></a>
       <div id="gift-bit" hidden>
         <p class="hint" style="margin:0 0 8px">אפשר להעביר בביט למספר</p>
         <button type="button" class="secondary bit-copy" id="bit-copy"></button>
@@ -216,230 +89,32 @@
 </main>
 
 <script>
-  // ===================== הגדרות — לערוך כאן =====================
-  const CONFIG = {
-    // כתובת ה-Web App של Apps Script (נגמרת ב-/exec). כשהשדה ריק, הדף עובד במצב הדגמה.
-    API_URL: 'https://script.google.com/macros/s/AKfycby4lBLsoiZYVjXAd-NYE6aGGlSZyExb31CJywgy9NwZ0n9NhZSjGgX4Q7G__cmL5rdeHQ/exec',
-    COUPLE: 'ויקטוריה & ידין',
-    DATE_PARTS: ['26', '11', '2026'],
-    DATE_LINE: 'יום חמישי · י״ז בכסלו תשפ״ז',
-    VENUE_TEXT: 'חוות אלנבי · נצר סירני',
-    RECEPTION_TIME: '19:30', // אם השדות ריקים, שורת השעות לא מוצגת
-    CHUPPAH_TIME: '20:30',
-    INVITE_IMAGE: 'invitation.jpg', // ההזמנה המעוצבת. כשיש תמונה, היא מחליפה את הכותרת הטקסטואלית
+  window.PAGE = {
+    INVITE_IMAGE: 'invitation.jpg',
     WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
+    SHOW_GIFT: true,
+    T: {
+      hi: 'היי ',
+      demoName: 'אורח לדוגמה',
+      plus: 'הוספה',
+      minus: 'הפחתה',
+      allergyMissing: 'נשמח לדעת לאיזה מזון יש אלרגיה',
+      saveFailed: 'אופס, התשובה לא נשמרה. נסו לשלוח שוב 🙏',
+      done: {
+        'מגיע': ['🥂', 'איזה כיף!', 'מחכים לראות אתכם ב-26.11'],
+        'לא מגיע': ['🤍', 'תודה שעדכנתם', 'נתגעגע! תודה שהודעתם לנו'],
+        'אולי': ['🙏', 'תודה!', 'כשתדעו, אפשר לחזור לאותו קישור ולעדכן'],
+      },
+      giftComing: 'רוצים לשלוח מתנה מראש? 🎁',
+      giftNotComing: 'רוצים לשלוח מתנה לזוג? 🎁',
+      giftPaybox: 'למתנה ב־PayBox 🎁',
+      giftBit: 'למתנה בביט 🎁',
+      giftGeneric: 'לשליחת מתנה 🎁',
+      bitCopySuffix: ' · העתקה 📋',
+      bitCopied: 'המספר הועתק ✓',
+    },
   };
-  // ================================================================
-
-  const $ = s => document.querySelector(s);
-  const id = new URLSearchParams(location.search).get('id');
-  const demo = !CONFIG.API_URL || id === 'demo';
-  const state = { status: '', count: 1, veg: 0, vegan: 0, gf: 0, max: 2 };
-
-  $('#couple').textContent = CONFIG.COUPLE;
-  $('#date').innerHTML = CONFIG.DATE_PARTS.map(p => `<span>${p}</span>`).join('<i></i>');
-  $('#date-line').textContent = CONFIG.DATE_LINE;
-  $('#venue').textContent = CONFIG.VENUE_TEXT;
-  if (CONFIG.RECEPTION_TIME || CONFIG.CHUPPAH_TIME) {
-    $('#t-reception').textContent = CONFIG.RECEPTION_TIME;
-    $('#t-chuppah').textContent = CONFIG.CHUPPAH_TIME;
-    $('#times').hidden = false;
-  }
-  if (CONFIG.INVITE_IMAGE) {
-    $('#invite-img').src = CONFIG.INVITE_IMAGE;
-    $('#invite-img').hidden = false;
-    document.querySelector('.hero').hidden = true;
-  }
-
-  function show(name) {
-    for (const s of ['loading', 'error', 'form-view', 'done']) $('#' + s).hidden = s !== name;
-  }
-
-  async function loadGuest() {
-    if (demo) return { ok: true, name: 'אורח לדוגמה', max: 4, response: null, gift: { paybox: 'https://example.com', bit: '050-1234567' } };
-    const res = await fetch(`${CONFIG.API_URL}?id=${encodeURIComponent(id)}`);
-    return res.json();
-  }
-
-  async function saveResponse(payload) {
-    if (demo) {
-      console.log('demo submit', payload);
-      await new Promise(r => setTimeout(r, 500));
-      return { ok: true };
-    }
-    // Apps Script עונה ל-POST בהפניה (redirect), וחלק מהדפדפנים בטלפון חוסמים את קריאת
-    // התשובה למרות שהשמירה הצליחה. לכן no-cors: לא קוראים את התשובה, ורק שגיאת רשת
-    // אמיתית (למשל אין אינטרנט) נחשבת כישלון. הבדיקות עצמן נעשות בשרת.
-    // keepalive: הבקשה ממשיכה גם אם האורח סוגר את הדף מיד אחרי השליחה.
-    await fetch(CONFIG.API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    });
-    return { ok: true };
-  }
-
-  // ---------- steppers ----------
-  document.querySelectorAll('.stepper').forEach(el => {
-    el.innerHTML = '<button type="button" data-d="1" aria-label="הוספה">+</button><output></output><button type="button" data-d="-1" aria-label="הפחתה">−</button>';
-    el.addEventListener('click', e => {
-      const d = Number(e.target.dataset.d);
-      if (!d) return;
-      state[el.dataset.key] += d;
-      render();
-    });
-  });
-
-  function render() {
-    // count קודם, כי שאר המונים מוגבלים לפיו
-    document.querySelectorAll('.stepper').forEach(el => {
-      const k = el.dataset.key;
-      const min = k === 'count' ? 1 : 0;
-      const max = k === 'count' ? state.max : state.count;
-      state[k] = Math.min(Math.max(state[k], min), max);
-      el.querySelector('output').textContent = state[k];
-      el.querySelector('[data-d="-1"]').disabled = state[k] <= min;
-      el.querySelector('[data-d="1"]').disabled = state[k] >= max;
-    });
-    document.querySelectorAll('.choice').forEach(b =>
-      b.setAttribute('aria-checked', String(b.dataset.status === state.status)));
-    $('#coming').hidden = state.status !== 'מגיע';
-    $('#notes-field').hidden = !state.status;
-    $('#allergy').hidden = !$('#has-allergy').checked;
-    $('#submit').disabled = !state.status;
-  }
-
-  // האורח כבר התחיל למלא, אז לא דורסים לו את הטופס בתשובה קודמת שהגיעה באיחור
-  let touched = false;
-  document.querySelectorAll('.choice').forEach(b =>
-    b.addEventListener('click', () => { touched = true; state.status = b.dataset.status; render(); }));
-  $('#has-allergy').addEventListener('change', render);
-
-  function formError(msg) {
-    $('#form-error').textContent = msg;
-    $('#form-error').hidden = !msg;
-  }
-
-  $('#submit').addEventListener('click', async () => {
-    const coming = state.status === 'מגיע';
-    const hasAllergy = coming && $('#has-allergy').checked;
-    const allergy = $('#allergy').value.trim();
-    if (hasAllergy && !allergy) return formError('נשמח לדעת לאיזה מזון יש אלרגיה');
-    formError('');
-
-    // השרת איטי, אז מראים תודה מיד ושומרים ברקע. אם השמירה נכשלת, חוזרים לטופס.
-    showDone();
-    try {
-      const res = await saveResponse({
-        id,
-        status: state.status,
-        count: coming ? state.count : 0,
-        veg: coming ? state.veg : 0,
-        vegan: coming ? state.vegan : 0,
-        gf: coming ? state.gf : 0,
-        allergy: hasAllergy ? allergy : '',
-        notes: $('#notes').value.trim(),
-      });
-      if (!res.ok) throw new Error(res.error);
-    } catch (err) {
-      console.error(err);
-      formError('אופס, התשובה לא נשמרה. נסו לשלוח שוב 🙏');
-      show('form-view');
-    }
-  });
-
-  function showDone() {
-    const texts = {
-      'מגיע': ['🥂', 'איזה כיף!', 'מחכים לראות אתכם ב-26.11'],
-      'לא מגיע': ['🤍', 'תודה שעדכנתם', 'נתגעגע! תודה שהודעתם לנו'],
-      'אולי': ['🙏', 'תודה!', 'כשתדעו, אפשר לחזור לאותו קישור ולעדכן'],
-    }[state.status];
-    [$('#done-emoji').textContent, $('#done-title').textContent, $('#done-text').textContent] = texts;
-    $('#waze').hidden = !(state.status === 'מגיע' && CONFIG.WAZE_URL);
-    $('#waze').href = CONFIG.WAZE_URL;
-    renderGift();
-    show('done');
-  }
-
-  // פרטי המתנה מגיעים מהשרת יחד עם פרטי האורח, ולא כתובים באתר (הוא ציבורי)
-  let gift = null;
-  function renderGift() {
-    const visible = gift && (state.status === 'מגיע' || state.status === 'לא מגיע');
-    $('#gift').hidden = !visible;
-    if (!visible) return;
-    $('#gift-title').textContent = state.status === 'מגיע'
-      ? 'רוצים לשלוח מתנה מראש? 🎁'
-      : 'רוצים לשלוח מתנה לזוג? 🎁';
-    // gift.paybox = קישור תשלום כלשהו (קבוצת PayBox או קישור אישי מביט)
-    const link = /^https:\/\//.test(gift.paybox || '') ? gift.paybox : '';
-    const linkBtn = $('#gift-paybox');
-    linkBtn.hidden = !link;
-    linkBtn.href = link || '#';
-    linkBtn.textContent = /paybox/i.test(link) ? 'למתנה ב־PayBox 🎁'
-      : /bit/i.test(link) ? 'למתנה בביט 🎁'
-      : 'לשליחת מתנה 🎁';
-    $('#gift-bit').hidden = !gift.bit;
-    const btn = $('#bit-copy');
-    btn.textContent = '';
-    if (gift.bit) {
-      const num = btn.appendChild(document.createElement('bdi'));
-      num.dir = 'ltr';
-      num.textContent = gift.bit;
-      btn.append(' · העתקה 📋');
-    }
-  }
-
-  $('#bit-copy').addEventListener('click', async () => {
-    const btn = $('#bit-copy');
-    try {
-      await navigator.clipboard.writeText(gift.bit.replace(/\D/g, ''));
-      btn.textContent = 'המספר הועתק ✓';
-    } catch (_) {
-      btn.textContent = gift.bit; // אם ההעתקה נחסמה, לפחות שהמספר יהיה גלוי
-    }
-    setTimeout(renderGift, 2000);
-  });
-
-  $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show('form-view'); });
-
-  // ---------- init ----------
-  // הטופס מוצג מיד, ופרטי האורח נטענים ברקע (השרת יכול לקחת כמה שניות)
-  (async () => {
-    if (!id && !demo) return show('error');
-    render();
-    show('form-view');
-    try {
-      const g = await loadGuest();
-      if (!g.ok) return show('error');
-      const hi = $('#greet-hi');
-      hi.textContent = 'היי ';
-      hi.appendChild(document.createElement('strong')).textContent = g.name;
-      hi.append(',');
-      state.max = Number(g.max) || 2;
-      gift = g.gift || null;
-      renderGift(); // למקרה שהאורח כבר שלח לפני שהפרטים הגיעו
-      const r = g.response;
-      if (r && !touched) {
-        Object.assign(state, {
-          status: r.status,
-          count: Number(r.count) || 1,
-          veg: Number(r.veg) || 0,
-          vegan: Number(r.vegan) || 0,
-          gf: Number(r.gf) || 0,
-        });
-        $('#has-allergy').checked = !!r.allergy;
-        $('#allergy').value = r.allergy || '';
-        $('#notes').value = r.notes || '';
-        $('#prev-note').hidden = false;
-      }
-      render();
-    } catch (err) {
-      // לא חוסמים את האורח: אפשר עדיין לשלוח, והשרת יבדוק את המזהה
-      console.error(err);
-    }
-  })();
 </script>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,102 @@
+/* משותף לדף העברי (index.html) ולדף האנגלי (en/index.html) */
+:root {
+  --bg: #eef0f3;
+  --card: #fffdf9;
+  --ink: #2b2a27;
+  --muted: #7a756c;
+  --line: #dde2ea;
+  --accent: #42567b;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6ebf3;
+  --gold: #8a9cbd;
+  --danger: #a14a3b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.5 'Assistant', system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 48px;
+}
+main {
+  width: 100%;
+  max-width: 460px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px 22px;
+  box-shadow: 0 10px 30px rgba(60, 50, 30, .07);
+}
+[hidden] { display: none !important; }
+
+.invite-img { display: block; width: 100%; border-radius: 12px; margin-bottom: 22px; }
+.greet { font-size: 19px; text-align: center; margin: 0 0 18px; }
+.note { background: var(--accent-soft); border-radius: 10px; padding: 8px 12px; font-size: 15px; text-align: center; margin: -6px 0 18px; }
+
+.choices { display: grid; gap: 10px; margin-bottom: 22px; }
+.choice {
+  font: inherit; font-weight: 600; font-size: 18px;
+  padding: 14px; border-radius: 14px; cursor: pointer;
+  background: var(--card); color: var(--ink); border: 1.5px solid var(--line);
+  transition: border-color .15s, background .15s;
+}
+.choice:hover { border-color: var(--accent); }
+.choice[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.field { margin-bottom: 20px; }
+.label { display: block; font-weight: 600; margin-bottom: 8px; }
+.hint { color: var(--muted); font-size: 15px; margin: -4px 0 10px; }
+.row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.row + .row { border-top: 1px dashed var(--line); }
+
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+[dir="ltr"] .stepper { flex-direction: row-reverse; } /* באנגלית: − 1 + */
+.stepper button {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+  font-size: 22px; line-height: 1; cursor: pointer;
+}
+.stepper button:disabled { opacity: .35; cursor: default; }
+.stepper output { min-width: 36px; text-align: center; font-size: 20px; font-weight: 700; }
+
+.check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+textarea {
+  width: 100%; font: inherit; padding: 10px 12px; margin-top: 10px;
+  border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
+  resize: vertical; min-height: 70px;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+
+.primary {
+  width: 100%; font: inherit; font-weight: 700; font-size: 19px;
+  padding: 15px; border: 0; border-radius: 14px; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink);
+}
+.primary:disabled { opacity: .45; cursor: default; }
+.secondary {
+  display: block; width: 100%; text-align: center; text-decoration: none;
+  font: inherit; font-weight: 600; padding: 13px; margin-top: 10px;
+  border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.error-msg { color: var(--danger); text-align: center; font-weight: 600; }
+
+.gift { margin: 22px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); }
+.gift-title { margin: 0 0 12px; font-weight: 600; }
+.gift-btn { display: block; text-decoration: none; text-align: center; background: var(--gold); }
+.bit-copy { font-size: 18px; margin-top: 0; }
+
+.center { text-align: center; }
+.big-emoji { font-size: 54px; margin: 8px 0; }
+.done-title { font-family: 'Frank Ruhl Libre', serif; margin: 0 0 8px; }
+.done-text { color: var(--muted); }
+.spinner {
+  width: 36px; height: 36px; margin: 40px auto; border-radius: 50%;
+  border: 3px solid var(--line); border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

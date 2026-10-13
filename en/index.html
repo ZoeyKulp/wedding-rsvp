@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Victoria &amp; Yadin's Wedding</title>
+<!-- WhatsApp link preview. The image needs an absolute URL and must stay under ~300KB -->
+<meta property="og:title" content="Victoria &amp; Yadin are getting married 💍">
+<meta property="og:description" content="26.11.2026 · Chavat Allenby, Kibbutz Netzer Sereni · Tap to RSVP">
+<meta property="og:image" content="https://zoeykulp.github.io/wedding-rsvp/en/invite.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../app.css">
+<style>.done-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; }</style>
+</head>
+<body>
+<main>
+  <img id="invite-img" class="invite-img" alt="Wedding invitation" hidden>
+
+  <section id="loading" class="center">
+    <div class="spinner" aria-label="Loading"></div>
+    <p style="color:var(--muted);margin-top:-20px">Loading your invitation... 💌<br><small>This may take a few seconds</small></p>
+  </section>
+
+  <section id="error" class="center" hidden>
+    <div class="big-emoji">🤔</div>
+    <p>This link doesn't look right. Please make sure you copied the full link from the message.</p>
+  </section>
+
+  <section id="form-view" hidden>
+    <p class="greet"><span id="greet-hi">Hi!</span> We'd love to know if you can make it 🤍</p>
+    <p class="note" id="prev-note" hidden>You've already replied. You can update your answer here.</p>
+
+    <div class="choices" role="radiogroup" aria-label="Will you attend?">
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="מגיע">Yes, we'll be there 🎉</button>
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="לא מגיע">Sorry, we can't make it</button>
+      <button type="button" class="choice" role="radio" aria-checked="false" data-status="אולי">Not sure yet</button>
+    </div>
+
+    <div id="coming" hidden>
+      <div class="field row">
+        <span class="label" style="margin:0">How many of you?</span>
+        <div class="stepper" data-key="count"></div>
+      </div>
+
+      <div class="field">
+        <span class="label">Dietary preferences</span>
+        <p class="hint">How many of you need a special meal? (Skip if none)</p>
+        <div class="row"><span>Vegetarian</span><div class="stepper" data-key="veg"></div></div>
+        <div class="row"><span>Vegan</span><div class="stepper" data-key="vegan"></div></div>
+        <div class="row"><span>Gluten-free</span><div class="stepper" data-key="gf"></div></div>
+      </div>
+
+      <div class="field">
+        <label class="check"><input type="checkbox" id="has-allergy"> Food allergy</label>
+        <textarea id="allergy" hidden maxlength="300" placeholder="Which food? (e.g. nuts, sesame, fish)"></textarea>
+      </div>
+    </div>
+
+    <div class="field" id="notes-field" hidden>
+      <label class="label" for="notes">Anything else you'd like to tell us? (optional)</label>
+      <textarea id="notes" maxlength="500"></textarea>
+    </div>
+
+    <p class="error-msg" id="form-error" hidden></p>
+    <button type="button" class="primary" id="submit" disabled>Send</button>
+  </section>
+
+  <section id="done" class="center" hidden>
+    <div class="big-emoji" id="done-emoji"></div>
+    <h2 class="done-title" id="done-title"></h2>
+    <p class="done-text" id="done-text"></p>
+    <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>Navigate with Waze 🚗</a>
+
+    <!-- gift is hidden on the English page (Israeli payment apps only), but app.js expects these elements -->
+    <div class="gift" id="gift" hidden>
+      <p class="gift-title" id="gift-title"></p>
+      <a class="primary gift-btn" id="gift-paybox" hidden></a>
+      <div id="gift-bit" hidden><button type="button" class="secondary bit-copy" id="bit-copy"></button></div>
+    </div>
+
+    <button type="button" class="secondary" id="edit">Update my answer</button>
+  </section>
+</main>
+
+<script>
+  window.PAGE = {
+    INVITE_IMAGE: 'invitation.jpg',
+    WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
+    SHOW_GIFT: false,
+    T: {
+      hi: 'Hi ',
+      demoName: 'Sample Guest',
+      plus: 'Add',
+      minus: 'Remove',
+      allergyMissing: 'Please tell us which food you are allergic to',
+      saveFailed: "Oops, your answer wasn't saved. Please try again 🙏",
+      done: {
+        'מגיע': ['🥂', 'Wonderful!', "Can't wait to see you on 26.11"],
+        'לא מגיע': ['🤍', 'Thank you for letting us know', "We'll miss you!"],
+        'אולי': ['🙏', 'Thank you!', 'Once you know, just open the same link and update your answer'],
+      },
+      giftComing: '', giftNotComing: '', giftPaybox: '', giftBit: '', giftGeneric: '',
+      bitCopySuffix: '', bitCopied: '',
+    },
+  };
+</script>
+<script src="../app.js"></script>
+</body>
+</html>

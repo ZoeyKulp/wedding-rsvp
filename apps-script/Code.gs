@@ -47,7 +47,37 @@ const DAY_MESSAGE =
   '{waze}' +
   '{gift}';
 
+// ההודעות באנגלית: למוזמנים שבעמודה "שפה" כתוב אצלם "אנגלית". הקישור שלהם מוביל לדף האנגלי.
+// בלי {gift}: כפתור המתנה (PayBox / ביט) עובד רק עם חשבון בנק ישראלי, אז לא מציגים אותו להם.
+const INVITE_MESSAGE_EN =
+  'Hi {name}! 🤍\n' +
+  "You're invited to the wedding of Victoria & Yadin 💍\n\n" +
+  'Thursday, 26.11.2026\n' +
+  'Chavat Allenby, Kibbutz Netzer Sereni, Israel\n\n' +
+  "We'd love to know if you can make it 🙏\n" +
+  'Please RSVP here 👇\n' +
+  '{link}';
+
+const NUDGE_MESSAGE_EN =
+  'Hi {name} 🤍\n' +
+  "Just a friendly reminder: we'd love to know if you can join Victoria & Yadin's wedding on 26.11 💍\n" +
+  'RSVP here 👇\n' +
+  '{link}';
+
+const DAY_MESSAGE_EN =
+  'Hi {name}! 🎉\n' +
+  "Today's the day! We can't wait to see you tonight at Chavat Allenby, Kibbutz Netzer Sereni 💍\n" +
+  'Reception 19:30 · Chuppah 20:30\n\n' +
+  'Navigate with Waze 🚗\n' +
+  '{waze}';
+
 // ================================================================
+
+const MESSAGES = {
+  invite: { he: INVITE_MESSAGE, en: INVITE_MESSAGE_EN },
+  nudge: { he: NUDGE_MESSAGE, en: NUDGE_MESSAGE_EN },
+  day: { he: DAY_MESSAGE, en: DAY_MESSAGE_EN },
+};
 
 const GUESTS_SHEET = 'מוזמנים';
 const SUMMARY_SHEET = 'סיכום';
@@ -70,6 +100,7 @@ const COLUMNS = [
   ['sent', 'נשלח'],
   ['id', 'מזהה'],
   ['remind', 'תזכורת'],
+  ['lang', 'שפה'],
 ];
 const C = Object.fromEntries(COLUMNS.map(([key], i) => [key, i]));
 const letter_ = key => String.fromCharCode(65 + C[key]);
@@ -149,6 +180,7 @@ function generateLinks() {
     ui.alert('אין מוזמנים בגיליון עדיין.');
     return;
   }
+  ensureHeaders_(sh);
 
   const data = sh.getRange(2, 1, n, COLUMNS.length).getValues();
   const used = new Set(data.map(r => String(r[C.id]).trim()).filter(Boolean));
@@ -156,6 +188,7 @@ function generateLinks() {
   const links = [];
   const badPhones = [];
   let made = 0;
+  let english = 0;
 
   data.forEach(r => {
     const name = String(r[C.name]).trim();
@@ -177,8 +210,9 @@ function generateLinks() {
       links.push(['']);
       return;
     }
-    links.push([`=HYPERLINK("${waLink_(phone, fillMessage_(INVITE_MESSAGE, name, id))}","שלח בוואטסאפ 📲")`]);
+    links.push([`=HYPERLINK("${waLink_(phone, fillMessage_('invite', r, id))}","שלח בוואטסאפ 📲")`]);
     made++;
+    if (isEnglish_(r)) english++;
   });
 
   sh.getRange(2, C.id + 1, n, 1).setValues(ids);
@@ -187,6 +221,7 @@ function generateLinks() {
   warmUp();
 
   let msg = `נוצרו ${made} קישורי שליחה ✅`;
+  if (english) msg += `\n(מתוכם ${english} באנגלית)`;
   if (badPhones.length) msg += `\n\nמספר טלפון חסר או לא תקין אצל:\n${badPhones.join('\n')}`;
   ui.alert(msg);
 }
@@ -194,15 +229,15 @@ function generateLinks() {
 // ---------------------- תזכורות ----------------------
 
 function remindPending() {
-  generateReminders_(r => !r[C.status] || r[C.status] === 'אולי', NUDGE_MESSAGE, 'למי שעוד לא ענה');
+  generateReminders_(r => !r[C.status] || r[C.status] === 'אולי', 'nudge', 'למי שעוד לא ענה');
 }
 
 function remindWeddingDay() {
-  generateReminders_(r => r[C.status] === 'מגיע', DAY_MESSAGE, 'ליום החתונה');
+  generateReminders_(r => r[C.status] === 'מגיע', 'day', 'ליום החתונה');
 }
 
 /** ממלא את עמודת "תזכורת" בקישורי וואטסאפ, רק לשורות שעומדות בתנאי */
-function generateReminders_(shouldRemind, template, label) {
+function generateReminders_(shouldRemind, messageKey, label) {
   const ui = SpreadsheetApp.getUi();
   const sh = guestsSheet_();
   const n = sh.getLastRow() - 1;
@@ -210,8 +245,7 @@ function generateReminders_(shouldRemind, template, label) {
     ui.alert('אין מוזמנים בגיליון עדיין.');
     return;
   }
-  // לגיליונות שנוצרו לפני שהייתה עמודת תזכורת
-  sh.getRange(1, C.remind + 1).setValue('תזכורת').setFontWeight('bold').setBackground('#e7ebe0');
+  ensureHeaders_(sh);
 
   let made = 0;
   const links = sh.getRange(2, 1, n, COLUMNS.length).getValues().map(r => {
@@ -220,7 +254,7 @@ function generateReminders_(shouldRemind, template, label) {
     const phone = normalizePhone_(r[C.phone]);
     if (!name || !id || !phone || !shouldRemind(r)) return [''];
     made++;
-    return [`=HYPERLINK("${waLink_(phone, fillMessage_(template, name, id))}","שלח תזכורת 🔔")`];
+    return [`=HYPERLINK("${waLink_(phone, fillMessage_(messageKey, r, id))}","שלח תזכורת 🔔")`];
   });
   sh.getRange(2, C.remind + 1, n, 1).setFormulas(links);
   ui.alert(`נוצרו ${made} קישורי תזכורת ${label} ✅\nהם בעמודה "תזכורת".`);
@@ -228,12 +262,29 @@ function generateReminders_(shouldRemind, template, label) {
 
 // ---------------------- הודעות וואטסאפ ----------------------
 
-function fillMessage_(template, name, id) {
-  return template
-    .split('{name}').join(name)
-    .split('{link}').join(SITE_URL + '?id=' + id)
+/** messageKey: 'invite' / 'nudge' / 'day'. השפה נקבעת לפי עמודת "שפה" של המוזמן. */
+function fillMessage_(messageKey, row, id) {
+  const en = isEnglish_(row);
+  return MESSAGES[messageKey][en ? 'en' : 'he']
+    .split('{name}').join(String(row[C.name]).trim())
+    .split('{link}').join(SITE_URL + (en ? 'en/' : '') + '?id=' + id)
     .split('{waze}').join(WAZE_URL)
-    .split('{gift}').join(giftLine_());
+    .split('{gift}').join(en ? '' : giftLine_());
+}
+
+function isEnglish_(row) {
+  return /^(אנגלית|english|en)$/i.test(String(row[C.lang] || '').trim());
+}
+
+/** משלים כותרות חסרות (לגיליונות שנוצרו לפני שנוספו עמודות כמו "תזכורת" ו"שפה") */
+function ensureHeaders_(sh) {
+  const header = sh.getRange(1, 1, 1, COLUMNS.length);
+  const values = header.getValues()[0];
+  if (values.every((v, i) => v === COLUMNS[i][1])) return;
+  header.setValues([COLUMNS.map(c => c[1])]).setFontWeight('bold').setBackground('#e7ebe0');
+  sh.getRange(2, C.lang + 1, sh.getMaxRows() - 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(['עברית', 'אנגלית']).setAllowInvalid(true).build()
+  );
 }
 
 function giftLine_() {
@@ -320,7 +371,7 @@ function guestPayload_(r) {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
-    gift: giftConfig_(),
+    gift: isEnglish_(r) ? null : giftConfig_(),
     response: r[C.status]
       ? {
           status: r[C.status],
