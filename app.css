@@ -85,11 +85,6 @@ textarea:focus { outline: none; border-color: var(--accent); }
 }
 .error-msg { color: var(--danger); text-align: center; font-weight: 600; }
 
-.gift { margin: 22px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); }
-.gift-title { margin: 0 0 12px; font-weight: 600; }
-.gift-btn { display: block; text-decoration: none; text-align: center; background: var(--gold); }
-.bit-copy { font-size: 18px; margin-top: 0; }
-
 .center { text-align: center; }
 .big-emoji { font-size: 54px; margin: 8px 0; }
 .done-title { font-family: 'Frank Ruhl Libre', serif; margin: 0 0 8px; }

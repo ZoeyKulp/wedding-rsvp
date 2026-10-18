@@ -22,12 +22,7 @@ function show(name) {
 }
 
 async function loadGuest() {
-  if (demo) {
-    return {
-      ok: true, name: T.demoName, max: 4, response: null,
-      gift: { paybox: 'https://example.com', bit: '050-1234567' },
-    };
-  }
+  if (demo) return { ok: true, name: T.demoName, max: 4, response: null };
   const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`);
   return res.json();
 }
@@ -125,44 +120,8 @@ function showDone() {
   [$('#done-emoji').textContent, $('#done-title').textContent, $('#done-text').textContent] = T.done[state.status];
   $('#waze').hidden = !(state.status === 'מגיע' && PAGE.WAZE_URL);
   $('#waze').href = PAGE.WAZE_URL;
-  renderGift();
   show('done');
 }
-
-// פרטי המתנה מגיעים מהשרת יחד עם פרטי האורח, ולא כתובים באתר (הוא ציבורי)
-let gift = null;
-function renderGift() {
-  const visible = PAGE.SHOW_GIFT && gift && (state.status === 'מגיע' || state.status === 'לא מגיע');
-  $('#gift').hidden = !visible;
-  if (!visible) return;
-  $('#gift-title').textContent = state.status === 'מגיע' ? T.giftComing : T.giftNotComing;
-  // gift.paybox = קישור תשלום כלשהו (קבוצת PayBox או קישור אישי מביט)
-  const link = /^https:\/\//.test(gift.paybox || '') ? gift.paybox : '';
-  const linkBtn = $('#gift-paybox');
-  linkBtn.hidden = !link;
-  linkBtn.href = link || '#';
-  linkBtn.textContent = /paybox/i.test(link) ? T.giftPaybox : /bit/i.test(link) ? T.giftBit : T.giftGeneric;
-  $('#gift-bit').hidden = !gift.bit;
-  const btn = $('#bit-copy');
-  btn.textContent = '';
-  if (gift.bit) {
-    const num = btn.appendChild(document.createElement('bdi'));
-    num.dir = 'ltr';
-    num.textContent = gift.bit;
-    btn.append(T.bitCopySuffix);
-  }
-}
-
-$('#bit-copy').addEventListener('click', async () => {
-  const btn = $('#bit-copy');
-  try {
-    await navigator.clipboard.writeText(gift.bit.replace(/\D/g, ''));
-    btn.textContent = T.bitCopied;
-  } catch (_) {
-    btn.textContent = gift.bit; // אם ההעתקה נחסמה, לפחות שהמספר יהיה גלוי
-  }
-  setTimeout(renderGift, 2000);
-});
 
 $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show('form-view'); });
 
@@ -180,8 +139,6 @@ $('#edit').addEventListener('click', () => { $('#prev-note').hidden = true; show
     hi.appendChild(document.createElement('strong')).textContent = g.name;
     hi.append(',');
     state.max = Number(g.max) || 2;
-    gift = g.gift || null;
-    renderGift(); // למקרה שהאורח כבר שלח לפני שהפרטים הגיעו
     const r = g.response;
     if (r && !touched) {
       Object.assign(state, {

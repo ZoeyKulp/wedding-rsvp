@@ -48,7 +48,7 @@ const DAY_MESSAGE =
   '{gift}';
 
 // ההודעות באנגלית: למוזמנים שבעמודה "שפה" כתוב אצלם "אנגלית". הקישור שלהם מוביל לדף האנגלי.
-// בלי {gift}: כפתור המתנה (PayBox / ביט) עובד רק עם חשבון בנק ישראלי, אז לא מציגים אותו להם.
+// בלי {gift}: PayBox / ביט עובדים רק עם חשבון בנק ישראלי, אז לא שולחים להם את פרטי המתנה.
 const INVITE_MESSAGE_EN =
   'Hi {name}! 🤍\n' +
   "You're invited to the wedding of Victoria & Yadin 💍\n\n" +
@@ -353,7 +353,7 @@ function setupGift() {
   const res = ui.prompt(
     '🎁 פרטי מתנה',
     'מספר טלפון לביט, או קישור תשלום (קישור אישי מביט / קבוצת PayBox).\n' +
-      'כדי להסיר את כפתור המתנה, משאירים ריק.' +
+      'הפרטים ייכנסו לתזכורת של יום החתונה. כדי להסיר, משאירים ריק.' +
       (current ? `\n\nכרגע מוגדר: ${current.paybox || current.bit}` : ''),
     ui.ButtonSet.OK_CANCEL
   );
@@ -376,9 +376,11 @@ function setupGift() {
     return;
   }
   giftCache_ = undefined;
-  warmUp(); // שהאורחים יראו את השינוי מיד, ולא בעוד 5 דקות
   const gift = giftConfig_();
-  ui.alert(gift ? `נשמר ✅\nכפתור המתנה יציג: ${gift.paybox || 'ביט ' + gift.bit}` : 'כפתור המתנה הוסר ✅');
+  ui.alert(gift
+    ? `נשמר ✅\nבתזכורת של יום החתונה יופיע: ${gift.paybox || 'ביט למספר ' + gift.bit}\n` +
+      '(אם כבר יצרת קישורי תזכורת ליום החתונה, צריך ליצור אותם מחדש)'
+    : 'פרטי המתנה הוסרו ✅');
 }
 
 let giftCache_;
@@ -421,7 +423,6 @@ function guestPayload_(r) {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
-    gift: isEnglish_(r) ? null : giftConfig_(),
     response: r[C.status]
       ? {
           status: r[C.status],

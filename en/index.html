@@ -76,13 +76,6 @@
     <p class="done-text" id="done-text"></p>
     <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>Navigate with Waze 🚗</a>
 
-    <!-- gift is hidden on the English page (Israeli payment apps only), but app.js expects these elements -->
-    <div class="gift" id="gift" hidden>
-      <p class="gift-title" id="gift-title"></p>
-      <a class="primary gift-btn" id="gift-paybox" hidden></a>
-      <div id="gift-bit" hidden><button type="button" class="secondary bit-copy" id="bit-copy"></button></div>
-    </div>
-
     <button type="button" class="secondary" id="edit">Update my answer</button>
   </section>
 </main>
@@ -91,7 +84,6 @@
   window.PAGE = {
     INVITE_IMAGE: 'invitation.jpg',
     WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
-    SHOW_GIFT: false,
     T: {
       hi: 'Hi ',
       demoName: 'Sample Guest',
@@ -104,8 +96,6 @@
         'לא מגיע': ['🤍', 'Thank you for letting us know', "We'll miss you!"],
         'אולי': ['🙏', 'Thank you!', 'Once you know, just open the same link and update your answer'],
       },
-      giftComing: '', giftNotComing: '', giftPaybox: '', giftBit: '', giftGeneric: '',
-      bitCopySuffix: '', bitCopied: '',
     },
   };
 </script>

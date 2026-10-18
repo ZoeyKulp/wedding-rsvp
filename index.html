@@ -75,15 +75,6 @@
     <p class="done-text" id="done-text"></p>
     <a class="secondary" id="waze" target="_blank" rel="noopener" hidden>ניווט עם Waze 🚗</a>
 
-    <div class="gift" id="gift" hidden>
-      <p class="gift-title" id="gift-title"></p>
-      <a class="primary gift-btn" id="gift-paybox" target="_blank" rel="noopener" hidden></a>
-      <div id="gift-bit" hidden>
-        <p class="hint" style="margin:0 0 8px">אפשר להעביר בביט למספר</p>
-        <button type="button" class="secondary bit-copy" id="bit-copy"></button>
-      </div>
-    </div>
-
     <button type="button" class="secondary" id="edit">עדכון התשובה</button>
   </section>
 </main>
@@ -92,7 +83,6 @@
   window.PAGE = {
     INVITE_IMAGE: 'invitation.jpg',
     WAZE_URL: 'https://waze.com/ul?navigate=yes&q=' + encodeURIComponent('חוות אלנבי נצר סרני'),
-    SHOW_GIFT: true,
     T: {
       hi: 'היי ',
       demoName: 'אורח לדוגמה',
@@ -105,13 +95,6 @@
         'לא מגיע': ['🤍', 'תודה שעדכנתם', 'נתגעגע! תודה שהודעתם לנו'],
         'אולי': ['🙏', 'תודה!', 'כשתדעו, אפשר לחזור לאותו קישור ולעדכן'],
       },
-      giftComing: 'רוצים לשלוח מתנה מראש? 🎁',
-      giftNotComing: 'רוצים לשלוח מתנה לזוג? 🎁',
-      giftPaybox: 'למתנה ב־PayBox 🎁',
-      giftBit: 'למתנה בביט 🎁',
-      giftGeneric: 'לשליחת מתנה 🎁',
-      bitCopySuffix: ' · העתקה 📋',
-      bitCopied: 'המספר הועתק ✓',
     },
   };
 </script>
