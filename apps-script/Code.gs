@@ -42,7 +42,7 @@ const NUDGE_MESSAGE =
 const DAY_MESSAGE =
   'היי {name}! 🎉\n' +
   'היום זה קורה! מחכים לראות אתכם הערב בחוות אלנבי, נצר סירני 💍\n' +
-  'קבלת פנים 19:30 · חופה 20:30\n\n' +
+  'קבלת פנים 19:00 · חופה 20:00\n\n' +
   'ניווט ב-Waze 🚗\n' +
   '{waze}' +
   '{gift}';
@@ -67,7 +67,7 @@ const NUDGE_MESSAGE_EN =
 const DAY_MESSAGE_EN =
   'Hi {name}! 🎉\n' +
   "Today's the day! We can't wait to see you tonight at Chavat Allenby, Kibbutz Netzer Sereni 💍\n" +
-  'Reception 19:30 · Chuppah 20:30\n\n' +
+  'Reception 19:00 · Chuppah 20:00\n\n' +
   'Navigate with Waze 🚗\n' +
   '{waze}';
 
