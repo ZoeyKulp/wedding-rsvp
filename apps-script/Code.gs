@@ -51,7 +51,7 @@ const DAY_MESSAGE =
 // בלי {gift}: PayBox / ביט עובדים רק עם חשבון בנק ישראלי, אז לא שולחים להם את פרטי המתנה.
 const INVITE_MESSAGE_EN =
   'Hi {name}! 🤍\n' +
-  "You're invited to the wedding of Victoria & Yadin 💍\n\n" +
+  "You're invited to Victoria & Yadin's wedding 💍\n\n" +
   'Thursday, 26.11.2026\n' +
   'Chavat Allenby, Kibbutz Netzer Sereni, Israel\n\n' +
   "We'd love to know if you can make it 🙏\n" +
