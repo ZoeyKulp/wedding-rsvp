@@ -122,6 +122,7 @@ function onOpen() {
     .addSeparator()
     .addItem('🎁 הגדרת פרטי מתנה', 'setupGift')
     .addItem('📊 רענון דף הסיכום', 'refreshSummary')
+    .addItem('🔧 העברת קבוצות מעמודת "סטטוס"', 'moveGroupsFromStatus')
     .addToUi();
 }
 
@@ -162,6 +163,53 @@ function setListValidation_(sh) {
   const list = values => SpreadsheetApp.newDataValidation().requireValueInList(values).setAllowInvalid(true).build();
   sh.getRange(2, C.lang + 1, rows).setDataValidation(list(['עברית', 'אנגלית']));
   sh.getRange(2, C.group + 1, rows).setDataValidation(list(GROUPS));
+}
+
+/** רק "מגיע" / "לא מגיע" / "אולי" נחשבים תשובה. כל ערך אחר בעמודת הסטטוס = עוד לא ענה. */
+function hasAnswered_(row) {
+  return STATUSES.includes(String(row[C.status]).trim());
+}
+
+/**
+ * תיקון: ערכים שנכתבו בטעות בעמודת "סטטוס" (למשל שם קבוצה) עוברים לעמודת "קבוצה",
+ * ועמודת הסטטוס מתרוקנת אצלם. תשובות אמיתיות (מגיע / לא מגיע / אולי) לא נוגעים בהן.
+ */
+function moveGroupsFromStatus() {
+  const ui = SpreadsheetApp.getUi();
+  const sh = guestsSheet_();
+  ensureHeaders_(sh);
+  // אותו מנעול כמו doPost, כדי לא לדרוס תשובה של אורח שנשלחת בדיוק עכשיו
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  let moved = 0;
+  try {
+    const n = sh.getLastRow() - 1;
+    if (n < 1) return;
+    const data = sh.getRange(2, 1, n, COLUMNS.length).getValues();
+    const status = [];
+    const group = [];
+    data.forEach(r => {
+      const s = String(r[C.status]).trim();
+      if (s && !hasAnswered_(r)) {
+        if (!String(r[C.group]).trim()) r[C.group] = s;
+        r[C.status] = '';
+        moved++;
+      }
+      status.push([r[C.status]]);
+      group.push([r[C.group]]);
+    });
+    if (moved) {
+      sh.getRange(2, C.status + 1, n, 1).setValues(status);
+      sh.getRange(2, C.group + 1, n, 1).setValues(group);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  warmUp(); // שהדף לא יציג "כבר אישרתם" למי שלא ענה
+  ui.alert(moved
+    ? `הועברו ${moved} ערכים מעמודת "סטטוס" לעמודת "קבוצה" ✅\n\n` +
+      'למי שכבר אישר, הקבוצה נדרסה. צריך למלא לו אותה ידנית בעמודת "קבוצה" (עמודה Q).'
+    : 'לא נמצאו ערכים להעביר ✅');
 }
 
 /** בונה מחדש את לשונית "סיכום": סיכום כללי בעמודות A-B, ופירוק לפי קבוצות מעמודה D */
@@ -280,7 +328,7 @@ function generateLinks() {
 // ---------------------- תזכורות ----------------------
 
 function remindPending() {
-  generateReminders_(r => !r[C.status] || r[C.status] === 'אולי', 'nudge', 'למי שעוד לא ענה');
+  generateReminders_(r => !hasAnswered_(r) || r[C.status] === 'אולי', 'nudge', 'למי שעוד לא ענה');
 }
 
 function remindWeddingDay() {
@@ -423,7 +471,7 @@ function guestPayload_(r) {
     ok: true,
     name: r[C.name],
     max: maxGuests_(r),
-    response: r[C.status]
+    response: hasAnswered_(r)
       ? {
           status: r[C.status],
           count: r[C.count],
