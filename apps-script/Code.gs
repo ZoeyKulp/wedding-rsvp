@@ -155,8 +155,43 @@ function refreshSummary() {
   const sh = guestsSheet_();
   ensureHeaders_(sh);
   setListValidation_(sh); // אם הרשימה GROUPS השתנתה
+  const { cleaned, unknown } = cleanGroups_(sh);
   buildSummary_();
-  SpreadsheetApp.getUi().alert('דף הסיכום עודכן ✅');
+
+  let msg = 'דף הסיכום עודכן ✅';
+  if (cleaned) msg += `\n\nתוקנו ${cleaned} תאים בעמודת "קבוצה" (רווחים או תווים נסתרים).`;
+  const names = Object.keys(unknown);
+  if (names.length) {
+    msg += '\n\nערכים בעמודת "קבוצה" שלא מתאימים לאף קבוצה (נספרים תחת "אחר"):\n' +
+      names.map(v => `• "${v}" (${unknown[v]})`).join('\n') +
+      '\nכדאי לבחור להם קבוצה מהרשימה הנפתחת.';
+  }
+  SpreadsheetApp.getUi().alert(msg);
+}
+
+/**
+ * מנקה את עמודת "קבוצה": רווחים בהתחלה ובסוף, רווח קשיח, ותווי כיווניות נסתרים
+ * (מגיעים בהעתקה מוואטסאפ ומקבצים). הנוסחאות בסיכום סופרות רק התאמה מדויקת.
+ */
+function cleanGroups_(sh) {
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return { cleaned: 0, unknown: {} };
+  const range = sh.getRange(2, C.group + 1, n, 1);
+  const names = sh.getRange(2, C.name + 1, n, 1).getValues();
+  let cleaned = 0;
+  const unknown = {};
+  const values = range.getValues().map(([v], i) => {
+    const raw = String(v);
+    const clean = raw
+      .replace(/[​-‏‪-‮⁦-⁩﻿]/g, '')
+      .replace(/[ \s]+/g, ' ')
+      .trim();
+    if (clean !== raw) cleaned++;
+    if (clean && String(names[i][0]).trim() && !GROUPS.includes(clean)) unknown[clean] = (unknown[clean] || 0) + 1;
+    return [clean];
+  });
+  if (cleaned) range.setValues(values);
+  return { cleaned, unknown };
 }
 
 /** רשימות נפתחות לעמודות "שפה" ו"קבוצה" (אפשר גם להקליד ערך אחר) */
