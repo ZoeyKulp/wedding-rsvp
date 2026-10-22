@@ -105,7 +105,7 @@ const COLUMNS = [
 ];
 
 // הקבוצות ברשימה הנפתחת של עמודת "קבוצה" ובטבלת הסיכום. אפשר להוסיף או לשנות כאן.
-const GROUPS = ['משפחה', 'חברים של ויקטוריה וידין', 'חברים של ההורים', 'חברים של האחים'];
+const GROUPS = ['משפחה', 'חברים של ויקטוריה', 'חברים של ידין', 'חברים של ההורים', 'חברים של האחים'];
 const C = Object.fromEntries(COLUMNS.map(([key], i) => [key, i]));
 const letter_ = key => String.fromCharCode(65 + C[key]);
 
@@ -152,7 +152,9 @@ function setup() {
 }
 
 function refreshSummary() {
-  ensureHeaders_(guestsSheet_());
+  const sh = guestsSheet_();
+  ensureHeaders_(sh);
+  setListValidation_(sh); // אם הרשימה GROUPS השתנתה
   buildSummary_();
   SpreadsheetApp.getUi().alert('דף הסיכום עודכן ✅');
 }
@@ -212,57 +214,138 @@ function moveGroupsFromStatus() {
     : 'לא נמצאו ערכים להעביר ✅');
 }
 
-/** בונה מחדש את לשונית "סיכום": סיכום כללי בעמודות A-B, ופירוק לפי קבוצות מעמודה D */
+/**
+ * בונה מחדש את לשונית "סיכום" כדשבורד: כותרת, כרטיסי מספרים, פס התקדמות,
+ * טבלה לפי קבוצות, אוכל ואלרגיות. הכל נוסחאות, אז הוא מתעדכן לבד כשמגיעות תשובות.
+ */
 function buildSummary_() {
   const ss = SpreadsheetApp.getActive();
   const sum = ss.getSheetByName(SUMMARY_SHEET) || ss.insertSheet(SUMMARY_SHEET, 1);
+  sum.getRange(1, 1, sum.getMaxRows(), sum.getMaxColumns()).breakApart();
   sum.clear();
   sum.setRightToLeft(true);
-  const col = key => `'${GUESTS_SHEET}'!${letter_(key)}2:${letter_(key)}`;
-  const coming = `${col('status')},"מגיע"`;
-  const summary = [
-    ['רשומות מוזמנים', `=COUNTA(${col('name')})`],
-    ['אישרו הגעה (רשומות)', `=COUNTIF(${coming})`],
-    ['סה"כ אורחים מגיעים', `=SUMIF(${coming},${col('count')})`],
-    ['לא מגיעים', `=COUNTIF(${col('status')},"לא מגיע")`],
-    ['אולי', `=COUNTIF(${col('status')},"אולי")`],
-    ['עוד לא ענו', `=COUNTIFS(${col('name')},"<>",${col('status')},"")`],
-    ['', ''],
-    ['מנות צמחוניות', `=SUMIF(${coming},${col('veg')})`],
-    ['מנות טבעוניות', `=SUMIF(${coming},${col('vegan')})`],
-    ['ללא גלוטן', `=SUMIF(${coming},${col('gf')})`],
-    ['אלרגיות', `=IFERROR(TEXTJOIN(CHAR(10),TRUE,FILTER(${col('name')}&": "&${col('allergy')},${col('allergy')}<>"",${col('status')}="מגיע")),"אין")`],
-  ];
-  sum.getRange(1, 1, summary.length, 2).setValues(summary);
-  sum.getRange(1, 1, summary.length, 1).setFontWeight('bold');
-  sum.setColumnWidth(1, 180);
-  sum.setColumnWidth(2, 320);
-  sum.getRange(summary.length, 2).setWrap(true);
+  sum.setHiddenGridlines(true);
 
-  // לפי קבוצות. "ללא קבוצה" תופס את מי שעוד לא שובץ, כדי שהסכומים יתאימו לסיכום הכללי.
-  const byGroup = (criteria, label) => {
-    const g = `${col('group')},${criteria}`;
-    return [
-      label,
-      `=COUNTIFS(${col('name')},"<>",${g})`,
-      `=COUNTIFS(${g},${coming})`,
-      `=SUMIFS(${col('count')},${g},${coming})`,
-      `=COUNTIFS(${g},${col('status')},"לא מגיע")`,
-      `=COUNTIFS(${g},${col('status')},"אולי")`,
-      `=COUNTIFS(${col('name')},"<>",${g},${col('status')},"")`,
-    ];
+  const BLUE = '#42567b', SOFT = '#e6ebf3', PAPER = '#f7f6f1', MUTED = '#7a756c', LINE = '#c9d2e0';
+  const col = key => `'${GUESTS_SHEET}'!${letter_(key)}2:${letter_(key)}`;
+  const st = col('status');
+  const R = (a1) => sum.getRange(a1);
+  const sectionTitle = (row, text) => {
+    R(`A${row}:H${row}`).merge()
+      .setBorder(null, null, true, null, null, null, LINE, SpreadsheetApp.BorderStyle.SOLID)
+      .getCell(1, 1).setValue(text)
+      .setHorizontalAlignment('right').setFontSize(13).setFontWeight('bold').setFontColor(BLUE);
+    sum.setRowHeight(row, 30);
   };
-  const groups = [
-    ['קבוצה', 'הוזמנו', 'אישרו', 'אורחים מגיעים', 'לא מגיעים', 'אולי', 'עוד לא ענו'],
-    ...GROUPS.map(name => byGroup(`"${name}"`, name)),
-    byGroup('""', 'ללא קבוצה'),
+  // כרטיס: כותרת קטנה בשורה אחת, מספר גדול בשורה שמתחתיה, על פני שתי עמודות
+  const card = (row, cols, label, formula, dark) => {
+    R(`${cols}${row}`.replace(':', `${row}:`)).merge().getCell(1, 1).setValue(label).setFontSize(10)
+      .setFontColor(dark ? '#dfe5ef' : MUTED).setBackground(dark ? BLUE : SOFT);
+    R(`${cols}${row + 1}`.replace(':', `${row + 1}:`)).merge().getCell(1, 1).setFormula(formula).setFontSize(26)
+      .setFontWeight('bold').setFontColor(dark ? '#ffffff' : BLUE).setBackground(dark ? BLUE : SOFT);
+  };
+  const bar = (done, left) =>
+    `SPARKLINE({${done},${left}},{"charttype","bar";"color1","${BLUE}";"color2","#dfe5ef";"rtl",true})`;
+
+  // מיקום הטבלה לפי קבוצות (הכרטיסים למעלה מפנים לשורת הסה״כ שלה)
+  const G0 = 10;
+  const otherRow = G0 + GROUPS.length;
+  const totalRow = otherRow + 1;
+
+  sum.getRange(1, 1, totalRow + 30, 8).setFontFamily('Assistant').setFontSize(11)
+    .setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sum.setColumnWidth(1, 200);
+  for (let c = 2; c <= 8; c++) sum.setColumnWidth(c, 105);
+
+  // כותרת
+  R('A1:H1').merge().getCell(1, 1).setValue('💍  ויקטוריה וידין · אישורי הגעה').setFontSize(20).setFontWeight('bold')
+    .setFontColor('#ffffff').setBackground(BLUE);
+  sum.setRowHeight(1, 54);
+  R('A2:H2').merge().getCell(1, 1).setValue('26.11.2026 · חוות אלנבי, נצר סירני · מתעדכן אוטומטית מגיליון "מוזמנים"')
+    .setFontSize(10).setFontColor(MUTED);
+  sum.setRowHeight(3, 12);
+
+  // כרטיסים
+  card(4, 'A:B', 'אורחים מגיעים', `=D${totalRow}`, true);
+  card(4, 'C:D', 'אישרו (הזמנות)', `=C${totalRow}`);
+  card(4, 'E:F', 'עוד לא ענו', `=G${totalRow}`);
+  card(4, 'G:H', 'לא מגיעים', `=E${totalRow}`);
+  sum.setRowHeight(4, 26);
+  sum.setRowHeight(5, 50);
+
+  // פס התקדמות
+  R('A6:C6').merge()
+    .setFormula(`="ענו "&TEXT(IFERROR((C${totalRow}+E${totalRow}+F${totalRow})/B${totalRow},0),"0%")&" מתוך "&B${totalRow}&" הזמנות"`)
+    .setFontColor(MUTED).setHorizontalAlignment('right');
+  R('D6:H6').merge().getCell(1, 1).setFormula(`=IF(B${totalRow}=0,"",${bar(`C${totalRow}+E${totalRow}+F${totalRow}`, `G${totalRow}`)})`);
+  sum.setRowHeight(6, 30);
+  sum.setRowHeight(7, 14);
+
+  // לפי קבוצות
+  sectionTitle(8, 'לפי קבוצות');
+  R('A9:H9').setValues([['קבוצה', 'הזמנות', 'אישרו', 'אורחים מגיעים', 'לא מגיעים', 'אולי', 'עוד לא ענו', 'ענו']])
+    .setFontWeight('bold').setFontColor(BLUE).setBackground(SOFT);
+  const groupRow = (r, label, criteria) => [
+    label,
+    `=COUNTIFS(${col('name')},"<>",${col('group')},${criteria})`,
+    `=COUNTIFS(${col('group')},${criteria},${st},"מגיע")`,
+    `=SUMIFS(${col('count')},${col('group')},${criteria},${st},"מגיע")`,
+    `=COUNTIFS(${col('group')},${criteria},${st},"לא מגיע")`,
+    `=COUNTIFS(${col('group')},${criteria},${st},"אולי")`,
+    `=B${r}-C${r}-E${r}-F${r}`,
+    `=IF(B${r}=0,"",${bar(`C${r}+E${r}+F${r}`, `G${r}`)})`,
   ];
-  const table = sum.getRange(1, 4, groups.length, groups[0].length);
-  table.setValues(groups);
-  sum.getRange(1, 4, 1, groups[0].length).setFontWeight('bold').setBackground('#e6ebf3');
-  sum.getRange(1, 4, groups.length, 1).setFontWeight('bold');
-  sum.setColumnWidth(4, 190);
-  for (let c = 5; c < 4 + groups[0].length; c++) sum.setColumnWidth(c, 95);
+  const rows = GROUPS.map((g, i) => groupRow(G0 + i, g, `"${g}"`));
+  // "אחר / ללא קבוצה" = כל מי שלא בקבוצות שברשימה (כולל ריק), כדי שהסכומים תמיד יתאימו
+  const o = otherRow, first = G0, last = otherRow - 1;
+  rows.push([
+    'אחר / ללא קבוצה',
+    `=COUNTA(${col('name')})-SUM(B${first}:B${last})`,
+    `=COUNTIF(${st},"מגיע")-SUM(C${first}:C${last})`,
+    `=SUMIF(${st},"מגיע",${col('count')})-SUM(D${first}:D${last})`,
+    `=COUNTIF(${st},"לא מגיע")-SUM(E${first}:E${last})`,
+    `=COUNTIF(${st},"אולי")-SUM(F${first}:F${last})`,
+    `=B${o}-C${o}-E${o}-F${o}`,
+    `=IF(B${o}=0,"",${bar(`C${o}+E${o}+F${o}`, `G${o}`)})`,
+  ]);
+  const t = totalRow;
+  rows.push([
+    'סה״כ',
+    `=SUM(B${first}:B${o})`, `=SUM(C${first}:C${o})`, `=SUM(D${first}:D${o})`,
+    `=SUM(E${first}:E${o})`, `=SUM(F${first}:F${o})`, `=SUM(G${first}:G${o})`,
+    `=IF(B${t}=0,"",${bar(`C${t}+E${t}+F${t}`, `G${t}`)})`,
+  ]);
+  R(`A${G0}:H${t}`).setFormulas(rows.map(r => r.map(v => (String(v).startsWith('=') ? v : ''))))
+    .setNumberFormat('0');
+  R(`A${G0}:A${t}`).setValues(rows.map(r => [r[0]])).setHorizontalAlignment('right').setFontWeight('bold');
+  for (let r = G0; r < t; r++) if ((r - G0) % 2 === 1) R(`A${r}:H${r}`).setBackground(PAPER);
+  R(`A${o}`).setFontColor(MUTED).setFontWeight('normal');
+  R(`A${t}:H${t}`).setFontWeight('bold').setFontColor(BLUE)
+    .setBorder(true, null, null, null, null, null, BLUE, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+  R(`D${G0}:D${t}`).setFontWeight('bold');
+  for (let r = G0; r <= t; r++) sum.setRowHeight(r, 28);
+
+  // אוכל
+  const food = t + 2;
+  sum.setRowHeight(t + 1, 14);
+  sectionTitle(food, '🍽️  אוכל (רק מי שאישר הגעה)');
+  card(food + 1, 'A:B', 'צמחוני', `=SUMIF(${st},"מגיע",${col('veg')})`);
+  card(food + 1, 'C:D', 'טבעוני', `=SUMIF(${st},"מגיע",${col('vegan')})`);
+  card(food + 1, 'E:F', 'ללא גלוטן', `=SUMIF(${st},"מגיע",${col('gf')})`);
+  card(food + 1, 'G:H', 'עם אלרגיה', `=COUNTIFS(${col('allergy')},"<>",${st},"מגיע")`);
+  sum.setRowHeight(food + 1, 26);
+  sum.setRowHeight(food + 2, 46);
+
+  // אלרגיות: רשימה שנפרסת כלפי מטה, שורה לכל מוזמן
+  const al = food + 4;
+  sum.setRowHeight(food + 3, 14);
+  sectionTitle(al, 'אלרגיות');
+  R(`A${al + 1}`)
+    .setFormula(`=IFERROR(FILTER(${col('name')}&"  ·  "&${col('allergy')},${col('allergy')}<>"",${st}="מגיע"),"אין אלרגיות כרגע 🎉")`)
+    .setHorizontalAlignment('right');
+  R(`A${al + 1}:A${al + 30}`).setHorizontalAlignment('right').setWrap(false);
+
+  sum.setFrozenRows(0);
 }
 
 // ---------------------- יצירת קישורי וואטסאפ ----------------------
